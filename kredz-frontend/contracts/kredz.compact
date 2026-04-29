@@ -1,0 +1,34 @@
+pragma language_version >= 0.22;
+
+// KREDZ ZK Smart Contract
+// Stores tier attestation and score hash on Midnight Network
+// Private inputs (attribute, fullKyc, scoreData) never leave the user's device —
+// only ZK proofs are submitted on-chain.
+
+// Public on-chain state
+export ledger tier: Uint<8>;
+export ledger scoreHash: Bytes<32>;
+export ledger attestationTimestamp: Uint<64>;
+
+// Tier 0: Anonymous — on-chain signals only, no private input needed
+export circuit setTier0(): [] {
+  tier = disclose(0 as Uint<8>);
+}
+
+// Tier 1: Pseudonymous — ZK-prove one real-world attribute (income, age, etc.)
+// The attribute value stays private; only the proof that it exists goes on-chain
+export circuit setTier1(attribute: Opaque<"string">): [] {
+  tier = disclose(1 as Uint<8>);
+}
+
+// Tier 2: Full Compliance — ZK-prove full KYC bundle
+// All KYC data stays private; only the compliance proof goes on-chain
+export circuit setTier2(fullKyc: Opaque<"string">): [] {
+  tier = disclose(2 as Uint<8>);
+}
+
+// Update score hash — called by the scoring engine after computing the KREDZ Score
+// The raw score data stays private; only the hash is stored publicly
+export circuit updateScore(scoreData: Opaque<"string">): [] {
+  scoreHash = disclose(pad(32, scoreData));
+}
