@@ -1,45 +1,23 @@
 /**
- * kredz.compact — KREDZ ZK Smart Contract
+ * kredz.compact — KREDZ ZK Smart Contract (Multichain Edition)
  *
- * This file documents the Compact contract source.
- * Compile with: compact compile kredz.compact managed/kredz
+ * Compile with: compact compile contracts/kredz.compact contracts/managed/kredz
  *
- * pragma language_version >= 0.22;
- *
- * export ledger tier: Uint<8>;
- * export ledger scoreHash: Bytes<32>;
- * export ledger attestationTimestamp: Uint<64>;
- *
- * // Tier 0: Anonymous — on-chain signals only
- * export circuit setTier0(): [] {
- *   tier = disclose(0 as Uint<8>);
- * }
- *
- * // Tier 1: Pseudonymous — ZK-prove one real-world attribute
- * // attribute stays private; only the proof goes on-chain
- * export circuit setTier1(attribute: Opaque<"string">): [] {
- *   tier = disclose(1 as Uint<8>);
- * }
- *
- * // Tier 2: Full Compliance — ZK-prove full KYC bundle
- * export circuit setTier2(fullKyc: Opaque<"string">): [] {
- *   tier = disclose(2 as Uint<8>);
- * }
- *
- * // Update score hash (called after scoring engine runs)
- * export circuit updateScore(scoreData: Opaque<"string">): [] {
- *   scoreHash = disclose(pad(32, scoreData));
- *   attestationTimestamp = disclose(current_time() as Uint<64>);
- * }
+ * Ledger state:
+ *   tier                — privacy tier (0/1/2)
+ *   scoreHash           — hash of the KREDZ score data
+ *   attestationTimestamp — last score update time
+ *   evmAddress          — linked Base/EVM wallet address (20 bytes)
+ *   scoreAttestation    — 32-byte blob for the off-chain relayer to bridge to Base
  */
-
-// TypeScript stub — replace with compiled managed/kredz output after running:
-// compact compile contracts/kredz.compact contracts/managed/kredz
 
 export interface KredzLedgerState {
   tier: number;
   scoreHash: Uint8Array;
   attestationTimestamp: bigint;
+  evmAddress: Uint8Array;
+  solanaAddress: Uint8Array;
+  scoreAttestation: Uint8Array;
 }
 
 export interface KredzContractAPI {
@@ -49,5 +27,7 @@ export interface KredzContractAPI {
   setTier0(): Promise<void>;
   setTier1(attribute: string): Promise<void>;
   setTier2(fullKyc: string): Promise<void>;
+  linkEvmAddress(addr: string): Promise<void>;
+  linkSolanaAddress(addr: string): Promise<void>;
   updateScore(scoreData: string): Promise<void>;
 }

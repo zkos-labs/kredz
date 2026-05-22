@@ -1,0 +1,64 @@
+module KredzScore where
+
+import DA.Time
+import DA.Text (show)
+
+-- | A borrower's credit score record on the Canton ledger.
+--   This contract is the authoritative Canton-side registry for a borrower's KREDZ Score.
+--   Only the kredz operator can create or update it. Lenders query it via the QueryScore choice.
+template KredzScore
+  with
+    operator : Party        -- kredz.xyz Canton participant node
+    borrowerDid : Text      -- pseudonymous Midnight DID
+    score : Int             -- 0-1000
+    tier : Text             -- "anonymous" | "pseudonymous" | "compliant"
+    proofHash : Text        -- hash of the ZK attestation from Midnight attestation_store
+    updatedAt : Time
+    expiresAt : Time        -- score valid for 30 days from update
+  where
+    signatory operator
+    observer operator
+
+    -- | Institution queries this borrower's score.
+    --   Accessible to any Party (lender). Creates a KredzScoreResponse visible only to the lender.
+    choice QueryScore : ContractId KredzScoreResponse
+      with
+        lender : Party
+        purpose : Text          -- "credit_assessment" | "risk_review" | "compliance_check"
+      controller lender
+      do
+        -- Verify the score has not expired
+        t <- getTime
+        assert (t <= expiresAt) -- expired scores cannot be queried
+
+        create KredzScoreResponse with
+          operator
+          lender
+          borrowerDid
+          score
+          tier
+          proofHash
+          queryTime = t
+          purpose
+          acknowledged = False
+
+    -- | kredz operator updates the score after recomputation.
+    --   Recreates the contract with updated score and proof hash.
+    choice UpdateScore : ContractId KredzScore
+      with
+        newScore : Int
+        newProofHash : Text
+      controller operator
+      do
+        t <- getTime
+        create this with
+          score = newScore
+          proofHash = newProofHash
+          updatedAt = t
+          expiresAt = addRelTime t (DA.Time.days 30)
+
+    -- | kredz operator manually expires the score (e.g., on credential revocation).
+    choice ExpireScore : ()
+      controller operator
+      do
+        return ()

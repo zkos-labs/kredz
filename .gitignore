@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+**/dist/
+build/
+contracts/cache/
+contracts/out/
+solana/target/
+backend/dist/
+
+# Environment files (DO NOT commit real keys)
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Agent skills (local dev tools)
+.agents/
+.claude/
+.gbrain/
+.gstack/
+skills-lock.json
+
+# Logs
+*.log
+logs/
+
+# Nix build artifacts
+.direnv/
+result

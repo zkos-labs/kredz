@@ -1,0 +1,20 @@
+[package]
+name = "kredz_score_badge"
+version = "0.1.0"
+description = "KREDZ Score Badge — Solana devnet attestation receiver"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "kredz_score_badge"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.31.0", features = ["idl-build"] }

@@ -1,0 +1,9 @@
+# Solana Anchor build artifacts
+target/
+
+# Keypairs (DO NOT COMMIT — keep as backups)
+*-keypair.json
+id.json
+
+# Node modules
+node_modules/

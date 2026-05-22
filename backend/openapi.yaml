@@ -1,0 +1,367 @@
+openapi: "3.1.0"
+info:
+  title: KREDZ Score API
+  version: "1.0.0"
+  description: |
+    Privacy-preserving credit scoring API for institutional lenders.
+    
+    **Base URL:** `https://api.kredz.xyz/v1`
+    
+    **Authentication:** API key via `X-Kredz-API-Key` header.
+    Keys are issued per institution after Canton participant onboarding.
+    
+    **Rate limit:** 1,000 score queries per institution per day (adjustable per contract).
+    
+    **Response integrity:** All score responses include an HMAC signature for verification.
+    The underlying proof hash can be independently verified against Midnight's
+    `attestation_store` (public state) and Canton's `KredzAuditLog` (immutable audit trail).
+    
+    ## Privacy Model
+    
+    kredz.xyz bridges two complementary privacy paradigms:
+    
+    | Network | Privacy Mechanism |
+    |---------|-------------------|
+    | Midnight | Zero-knowledge proofs — score is proven without revealing raw financial data |
+    | Canton | Sub-transaction privacy — only the querying lender + kredz operator see each response |
+    
+    No raw borrower financial data is ever transmitted via this API. Scores, tier labels,
+    layer breakdowns, and proof hashes only.
+
+servers:
+  - url: https://api.kredz.xyz/v1
+    description: Production API
+  - url: http://localhost:3001/api/v1
+    description: Local development
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /score/{did}:
+    get:
+      summary: Query borrower's KREDZ Score
+      operationId: getScore
+      parameters:
+        - name: did
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "did:midnight:abc123"
+          description: Midnight DID of the borrower (pseudonymous)
+      responses:
+        "200":
+          description: Score response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Borrower not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /score/refresh:
+    post:
+      summary: Trigger manual score recomputation
+      operationId: refreshScore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - did
+              properties:
+                did:
+                  type: string
+                  example: "did:midnight:abc123"
+      responses:
+        "200":
+          description: Score refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  score:
+                    $ref: "#/components/schemas/ScoreResponse"
+                  attestation_id:
+                    type: string
+                    example: "att-550e8400-e29b-41d4-a716-446655440000"
+
+  /score/attest:
+    post:
+      summary: Generate attestation proof for cross-network sync
+      description: |
+        Generates a signed score attestation for relay to Base (chain=0)
+        or Canton (chain=1). The attestation includes a proof hash that can
+        be independently verified.
+      operationId: generateAttestation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - did
+              properties:
+                did:
+                  type: string
+                  example: "did:midnight:abc123"
+                chain:
+                  type: integer
+                  enum: [0, 1]
+                  default: 0
+                  description: "0 = Base, 1 = Canton"
+      responses:
+        "200":
+          description: Attestation generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreAttestation"
+
+  /audit:
+    get:
+      summary: Generate compliance audit report
+      description: |
+        Returns all score queries made by the requesting lender in the specified
+        period. Report is DAML-signed by both parties for regulatory use.
+      operationId: getAuditReport
+      parameters:
+        - name: lender_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Institution ID (from API key scope)
+        - name: period_start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start of reporting period (ISO 8601)
+        - name: period_end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End of reporting period (ISO 8601)
+      responses:
+        "200":
+          description: Audit report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AuditEntry"
+                  total_count:
+                    type: integer
+                  export_url:
+                    type: string
+                    description: URL to download PDF report with DAML signatures
+
+  /oracle/base/{evm_address}:
+    get:
+      summary: Read KREDZ Score badge on Base
+      description: Reads the KredzScoreBadge SBT on Base for a given EVM address.
+      operationId: getBaseScore
+      parameters:
+        - name: evm_address
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^0x[a-fA-F0-9]{40}$"
+            example: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1"
+      responses:
+        "200":
+          description: Base score data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  score:
+                    type: integer
+                    example: 720
+                  tier:
+                    type: string
+                    example: "pseudonymous"
+                  valid_until:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Kredz-API-Key
+
+  schemas:
+    ScoreResponse:
+      type: object
+      properties:
+        did:
+          type: string
+          example: "did:midnight:abc123"
+          description: Pseudonymous borrower identifier
+        score:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          example: 720
+        tier:
+          type: string
+          enum: ["anonymous", "pseudonymous", "compliant"]
+        score_floor:
+          type: integer
+          description: ZK-proven floor value (proves score > floor without exact disclosure)
+          example: 670
+        layer_breakdown:
+          type: object
+          properties:
+            onchain_pct:
+              type: integer
+              example: 41
+            zk_kyc_pct:
+              type: integer
+              example: 38
+            literacy_pct:
+              type: integer
+              example: 21
+        proof_hash:
+          type: string
+          description: Hash of the signed score attestation — verifiable against Midnight attestation_store
+          example: "0x8f14e45fcea302e8..."
+        midnight_attestation_id:
+          type: string
+          example: "att-550e8400-e29b-41d4-a716-446655440000"
+        valid_until:
+          type: string
+          format: date-time
+          description: Score valid for 30 days from computation
+        updated_at:
+          type: string
+          format: date-time
+
+    ScoreAttestation:
+      type: object
+      properties:
+        attestationId:
+          type: string
+        did:
+          type: string
+        score:
+          type: integer
+        tier:
+          type: integer
+          minimum: 0
+          maximum: 2
+        layerBreakdown:
+          type: object
+          properties:
+            layer1: { type: integer }
+            layer2: { type: integer }
+            layer3: { type: integer }
+        proofHash:
+          type: string
+          description: ECDSA signature of the attestation payload
+        recipientChain:
+          type: integer
+          enum: [0, 1]
+        signedAt:
+          type: string
+          format: date-time
+
+    AuditEntry:
+      type: object
+      properties:
+        borrower_did:
+          type: string
+          description: Pseudonymous borrower DID
+        score:
+          type: integer
+        query_time:
+          type: string
+          format: date-time
+        purpose:
+          type: string
+          enum: ["credit_assessment", "risk_review", "compliance_check"]
+        daml_contract_id:
+          type: string
+          description: Canton KredzAuditLog contract ID (immutable, dual-signed)
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+
+    WebhookEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: ["score.updated"]
+        subscription_id:
+          type: string
+        borrower_did:
+          type: string
+        old_score:
+          type: integer
+        new_score:
+          type: integer
+        delta:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+
+  responses:
+    Unauthorized:
+      description: Missing API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Invalid API key or insufficient scope
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+      headers:
+        Retry-After:
+          schema:
+            type: integer

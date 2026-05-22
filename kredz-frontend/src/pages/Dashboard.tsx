@@ -1,10 +1,14 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Lock, BookOpen, Shield, RefreshCw, Loader2 } from 'lucide-react';
+import { TrendingUp, Lock, BookOpen, Shield, RefreshCw, Loader2, Link2, Award, ExternalLink } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { LiteracyModules } from '../components/LiteracyModules';
 import { joinKredzContract } from '../midnight/contract';
 import { toast } from '../components/Toast';
+import { useBaseScore } from '../hooks/useBaseScore';
+import { useSolanaScore } from '../hooks/useSolanaScore';
 
 const TIER_LABELS = ['Anonymous', 'Pseudonymous', 'Full Compliance'];
 const TIER_COLORS = ['text-slate-400', 'text-gold', 'text-yellow-300'];
@@ -74,8 +78,41 @@ function AnimatedNumber({ value, className }: { value: number; className?: strin
 }
 
 export default function Dashboard() {
-  const { wallet, tier, score, layerScores, contractAddress, setScore, setLayerScores } = useApp();
+  const { wallet, tier, score, layerScores, contractAddress, setScore, setLayerScores, evmWallet, solanaWallet, walletsLinked, setBaseScore, setBaseScoreTimestamp, setSolanaScore, setSolanaScoreTimestamp } = useApp();
   const [refreshing, setRefreshing] = useState(false);
+  const { data: baseData, loading: baseLoading, minting: baseMinting, fetchScore: fetchBaseScore, mintBadge } = useBaseScore();
+  const { data: solanaData, loading: solanaLoading, fetchScore: fetchSolanaScore } = useSolanaScore();
+  const [solanaMinting, setSolanaMinting] = useState(false);
+
+  // Fetch Base score on mount if wallets are linked
+  useEffect(() => {
+    if (walletsLinked && evmWallet?.address) {
+      fetchBaseScore(evmWallet.address);
+    }
+  }, [walletsLinked, evmWallet?.address, fetchBaseScore]);
+
+  // Fetch Solana score on mount if wallets are linked
+  useEffect(() => {
+    if (walletsLinked && solanaWallet?.address) {
+      fetchSolanaScore(solanaWallet.address);
+    }
+  }, [walletsLinked, solanaWallet?.address, fetchSolanaScore]);
+
+  // Sync baseScore into context when baseData changes
+  useEffect(() => {
+    if (baseData) {
+      setBaseScore(baseData.score);
+      setBaseScoreTimestamp(baseData.timestamp);
+    }
+  }, [baseData, setBaseScore, setBaseScoreTimestamp]);
+
+  // Sync solanaScore into context when solanaData changes
+  useEffect(() => {
+    if (solanaData) {
+      setSolanaScore(solanaData.score);
+      setSolanaScoreTimestamp(solanaData.timestamp);
+    }
+  }, [solanaData, setSolanaScore, setSolanaScoreTimestamp]);
 
   async function refreshScore() {
     if (!wallet || !contractAddress) return;
@@ -90,10 +127,39 @@ export default function Dashboard() {
       setLayerScores(base);
       setScore(base.reduce((a, b) => a + b, 0));
       toast('Score refreshed from chain', 'success');
+      // Also refresh Base and Solana scores
+      if (walletsLinked && evmWallet?.address) await fetchBaseScore(evmWallet.address);
+      if (walletsLinked && solanaWallet?.address) await fetchSolanaScore(solanaWallet.address);
     } catch {
       toast('Failed to refresh score', 'error');
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  async function handleMintBadge() {
+    if (!evmWallet?.address) return;
+    try {
+      await mintBadge(evmWallet.address, score, tier ?? 0, Math.floor(Date.now() / 1000));
+      toast('Score badge minted on Base!', 'success');
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Mint failed', 'error');
+    }
+  }
+
+  async function handleMintSolanaBadge() {
+    if (!solanaWallet?.address) return;
+    setSolanaMinting(true);
+    try {
+      // In production: call relayer API to get Ed25519 signature, then use mintBadge()
+      // For now: simulate minting with a toast
+      await new Promise(r => setTimeout(r, 1500));
+      toast('Solana badge minting requires relayer signature. Coming soon!', 'info');
+      // await mintBadge(solanaWallet.address, score, tier ?? 0, Math.floor(Date.now() / 1000), relayerSig, relayerPubkey);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : 'Mint failed', 'error');
+    } finally {
+      setSolanaMinting(false);
     }
   }
 
@@ -182,6 +248,134 @@ export default function Dashboard() {
             </div>
           </motion.div>
         </div>
+
+        {/* Base Score Card — shown when wallets are linked */}
+        {walletsLinked && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+            className="glass rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <Link2 size={20} className="text-blue-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-manrope font-bold text-light">Base Score</span>
+                  <span className="text-[10px] font-inter font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/20 text-blue-300">
+                    ERC-8004
+                  </span>
+                </div>
+                {baseLoading ? (
+                  <div className="flex items-center gap-2 text-light/40 text-sm font-inter">
+                    <Loader2 size={13} className="animate-spin" /> Fetching from Base…
+                  </div>
+                ) : baseData ? (
+                  <div className="flex items-center gap-3">
+                    <span className="font-manrope font-black text-2xl text-gradient">{baseData.score}</span>
+                    <span className="font-inter text-xs text-light/40">
+                      Last synced {new Date(baseData.timestamp * 1000).toLocaleDateString()}
+                    </span>
+                    {baseData.tokenId > 0 && (
+                      <a href={`https://sepolia.basescan.org/token/${import.meta.env.VITE_BADGE_ADDRESS}?a=${evmWallet?.address}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs font-inter text-blue-300 hover:text-blue-200 transition-colors">
+                        <Award size={12} /> Badge #{baseData.tokenId} <ExternalLink size={10} />
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <p className="font-inter text-sm text-light/40">
+                    No Base score yet — sync your score to bridge it.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => evmWallet?.address && fetchBaseScore(evmWallet.address)}
+                disabled={baseLoading}
+                className="flex items-center gap-1.5 glass px-3 py-2 rounded-xl text-xs font-inter text-light/60 hover:text-light transition-colors"
+              >
+                {baseLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                Sync
+              </button>
+              <button
+                onClick={handleMintBadge}
+                disabled={baseMinting || score === 0}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 text-dark font-manrope font-semibold text-xs transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {baseMinting ? <Loader2 size={13} className="animate-spin" /> : <Award size={13} />}
+                {baseData?.tokenId ? 'Update Badge' : 'Mint Badge'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Solana Score Card — shown when wallets are linked */}
+        {walletsLinked && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
+            className="glass rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500/20 to-teal-500/20 border border-green-500/20 flex items-center justify-center shrink-0">
+                <Link2 size={20} className="text-green-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-manrope font-bold text-light">Solana Score</span>
+                  <span className="text-[10px] font-inter font-semibold px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/20 text-green-300">
+                    Devnet
+                  </span>
+                </div>
+                {solanaLoading ? (
+                  <div className="flex items-center gap-2 text-light/40 text-sm font-inter">
+                    <Loader2 size={13} className="animate-spin" /> Fetching from Solana…
+                  </div>
+                ) : solanaData ? (
+                  <div className="flex items-center gap-3">
+                    <span className="font-manrope font-black text-2xl text-gradient">{solanaData.score}</span>
+                    <span className="font-inter text-xs text-light/40">
+                      Last synced {new Date(solanaData.timestamp * 1000).toLocaleDateString()}
+                    </span>
+                    {solanaData.tier > 0 && (
+                      <span className="text-[10px] font-inter font-semibold px-2 py-0.5 rounded-full bg-gold/15 border border-gold/20 text-gold">
+                        Tier {solanaData.tier}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="font-inter text-sm text-light/40">
+                    No Solana score yet — sync your score to bridge it.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => solanaWallet?.address && fetchSolanaScore(solanaWallet.address)}
+                disabled={solanaLoading}
+                className="flex items-center gap-1.5 glass px-3 py-2 rounded-xl text-xs font-inter text-light/60 hover:text-light transition-colors"
+              >
+                {solanaLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                Sync
+              </button>
+              <button
+                onClick={handleMintSolanaBadge}
+                disabled={solanaMinting || score === 0}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-teal-400 text-dark font-manrope font-semibold text-xs transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {solanaMinting ? <Loader2 size={13} className="animate-spin" /> : <Award size={13} />}
+                Mint Badge
+              </button>
+              <a
+                href={`https://solscan.io/account/${solanaWallet?.address}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl glass text-xs font-inter text-light/60 hover:text-light transition-colors"
+              >
+                <ExternalLink size={13} />
+              </a>
+            </div>
+          </motion.div>
+        )}
 
         {/* Literacy Modules */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>

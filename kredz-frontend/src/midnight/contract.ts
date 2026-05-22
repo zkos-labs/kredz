@@ -2,35 +2,24 @@ import { buildProviders } from './providers';
 import type { ConnectedWallet } from '../hooks/useMidnightWallet';
 import type { KredzContractAPI } from '../contracts/kredz';
 
-// Mock contract API for now — replace with real MidnightSetupAPI after compiling kredz.compact
 export async function deployKredzContract(wallet: ConnectedWallet): Promise<KredzContractAPI> {
   await buildProviders(wallet);
-  
-  // TODO: Replace with real deployment after compiling kredz.compact:
-  // const contractInstance = new KredzContract({});
-  // const api = await MidnightSetupAPI.deployContract(providers, contractInstance);
-  
-  // Mock deployment for now
   const mockAddress = `mock_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   console.log('[KREDZ] Mock contract deployed at:', mockAddress);
-  
   return createMockAPI(mockAddress);
 }
 
 export async function joinKredzContract(wallet: ConnectedWallet, address: string): Promise<KredzContractAPI> {
   await buildProviders(wallet);
-  
-  // TODO: Replace with real join after compiling kredz.compact:
-  // const contractInstance = new KredzContract({});
-  // const api = await MidnightSetupAPI.joinContract(providers, contractInstance, address);
-  
   return createMockAPI(address);
 }
 
 function createMockAPI(address: string): KredzContractAPI {
   let mockTier = 0;
   let mockScore = 0;
-  
+  let mockEvmAddress = new Uint8Array(20);
+  let mockAttestation = new Uint8Array(32);
+
   return {
     deployedContractAddress: address,
     async getContractState() {
@@ -39,6 +28,9 @@ function createMockAPI(address: string): KredzContractAPI {
           tier: mockTier,
           scoreHash: new Uint8Array(32),
           attestationTimestamp: BigInt(Date.now()),
+          evmAddress: mockEvmAddress,
+          solanaAddress: new Uint8Array(32),
+          scoreAttestation: mockAttestation,
         },
       };
     },
@@ -48,31 +40,52 @@ function createMockAPI(address: string): KredzContractAPI {
           tier: mockTier,
           scoreHash: new Uint8Array(32),
           attestationTimestamp: BigInt(Date.now()),
+          evmAddress: mockEvmAddress,
+          solanaAddress: new Uint8Array(32),
+          scoreAttestation: mockAttestation,
         },
       };
     },
     async setTier0() {
-      console.log('[KREDZ] Setting tier 0 (Anonymous)');
       await new Promise(r => setTimeout(r, 1500));
       mockTier = 0;
       mockScore = Math.floor(Math.random() * 200) + 150;
     },
     async setTier1(attribute: string) {
-      console.log('[KREDZ] Setting tier 1 (Pseudonymous) with attribute:', attribute);
       await new Promise(r => setTimeout(r, 2000));
       mockTier = 1;
       mockScore = Math.floor(Math.random() * 250) + 350;
+      void attribute;
     },
     async setTier2(fullKyc: string) {
-      console.log('[KREDZ] Setting tier 2 (Full Compliance) with KYC:', fullKyc);
       await new Promise(r => setTimeout(r, 2500));
       mockTier = 2;
       mockScore = Math.floor(Math.random() * 350) + 650;
+      void fullKyc;
+    },
+    async linkEvmAddress(addr: string) {
+      console.log('[KREDZ] Linking EVM address:', addr);
+      await new Promise(r => setTimeout(r, 1000));
+      const hex = addr.replace('0x', '').padEnd(40, '0').slice(0, 40);
+      mockEvmAddress = new Uint8Array(hex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+    },
+    async linkSolanaAddress(addr: string) {
+      console.log('[KREDZ] Linking Solana address:', addr);
+      await new Promise(r => setTimeout(r, 1000));
+      void addr; // stored as base58 — in real contract encoded as Bytes<32>
     },
     async updateScore(scoreData: string) {
-      console.log('[KREDZ] Updating score with data:', scoreData);
       await new Promise(r => setTimeout(r, 1000));
       mockScore += Math.floor(Math.random() * 50) + 10;
+      // Build a mock attestation: score (2 bytes) + evmAddress (20 bytes) + timestamp (8 bytes) + padding
+      const score = Math.min(mockScore, 1000);
+      mockAttestation = new Uint8Array(32);
+      mockAttestation[0] = (score >> 8) & 0xff;
+      mockAttestation[1] = score & 0xff;
+      mockAttestation.set(mockEvmAddress, 2);
+      const ts = BigInt(Date.now());
+      for (let i = 0; i < 8; i++) mockAttestation[22 + i] = Number((ts >> BigInt(56 - i * 8)) & 0xffn);
+      void scoreData;
     },
   };
 }

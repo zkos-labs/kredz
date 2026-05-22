@@ -1,0 +1,61 @@
+module KredzQuery where
+
+import DA.Time
+
+-- | Response to a lender's ScoreQuery.
+--   Visible to the lender and the kredz operator only.
+--   Sub-transaction privacy ensures no other participants see this.
+template KredzScoreResponse
+  with
+    operator : Party
+    lender : Party
+    borrowerDid : Text
+    score : Int
+    tier : Text
+    proofHash : Text
+    queryTime : Time
+    purpose : Text
+    acknowledged : Bool
+  where
+    signatory operator
+    observer lender
+
+    -- | Lender acknowledges receipt, creating an immutable audit record.
+    choice AcknowledgeScore : ContractId KredzAuditLog
+      controller lender
+      do
+        assert (not acknowledged)  -- cannot acknowledge twice
+
+        -- Mark this response as acknowledged
+        create this with
+          acknowledged = True
+
+        create KredzAuditLog with
+          operator
+          lender
+          borrowerDid
+          score
+          queryTime
+          purpose
+
+    -- | kredz operator can view the acknowledgment status.
+    choice MarkAcknowledged : ContractId KredzScoreResponse
+      controller operator
+      do
+        create this with
+          acknowledged = True
+
+-- | Immutable audit log of each score query.
+--   Signed by both the kredz operator and the lender.
+--   Cannot be modified or archived (no choices other than those inherited).
+template KredzAuditLog
+  with
+    operator : Party
+    lender : Party
+    borrowerDid : Text
+    score : Int
+    queryTime : Time
+    purpose : Text
+  where
+    signatory operator, lender
+    -- No choices — immutable audit record

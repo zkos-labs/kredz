@@ -1,0 +1,185 @@
+# Canton Network LocalNet for kredz.xyz
+#
+# Sets up a local Canton Network sandbox with:
+#   - Participanti validator (kredz operator)
+#   - Participant2 validator (institutional lender)
+#   - Canton Global Synchronizer (sequencer + mediator)
+#   - PostgreSQL for each participant
+#   - JSON Ledger API endpoints
+#
+# Usage:
+#   docker compose up -d
+#   docker compose logs -f participant1
+#
+# Prerequisites: Docker 24+, docker compose v2+
+
+services:
+  # ── PostgreSQL databases ──
+  postgres-participant1:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: canton
+      POSTGRES_PASSWORD: canton
+      POSTGRES_DB: participant1
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_p1:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canton -d participant1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-participant2:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: canton
+      POSTGRES_PASSWORD: canton
+      POSTGRES_DB: participant2
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_p2:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canton -d participant2"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-sequencer:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: canton
+      POSTGRES_PASSWORD: canton
+      POSTGRES_DB: sequencer
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_seq:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canton -d sequencer"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-mediator:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: canton
+      POSTGRES_PASSWORD: canton
+      POSTGRES_DB: mediator
+    ports:
+      - "5435:5432"
+    volumes:
+      - pg_med:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canton -d mediator"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Canton Participant 1 (kredz.xyz operator) ──
+  participant1:
+    image: digitalasset/canton-open-source:latest
+    depends_on:
+      postgres-participant1:
+        condition: service_healthy
+      sequencer:
+        condition: service_started
+      mediator:
+        condition: service_started
+    ports:
+      - "3901:3901"  # Ledger API
+      - "3902:3902"  # Admin API
+      - "3975:3975"  # JSON Ledger API
+    volumes:
+      - ./config/participant1.conf:/canton/participant.conf:ro
+    environment:
+      POSTGRES_HOST: postgres-participant1
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        /canton/bin/canton daemon \
+          --config /canton/participant.conf \
+          --bootstrap /canton/bootstrap.canton
+
+  # ── Canton Participant 2 (institutional lender) ──
+  participant2:
+    image: digitalasset/canton-open-source:latest
+    depends_on:
+      postgres-participant2:
+        condition: service_healthy
+      sequencer:
+        condition: service_started
+      mediator:
+        condition: service_started
+    ports:
+      - "4901:3901"  # Ledger API
+      - "4902:3902"  # Admin API
+      - "4975:3975"  # JSON Ledger API
+    volumes:
+      - ./config/participant2.conf:/canton/participant.conf:ro
+    environment:
+      POSTGRES_HOST: postgres-participant2
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        /canton/bin/canton daemon \
+          --config /canton/participant.conf \
+          --bootstrap /canton/bootstrap.canton
+
+  # ── Global Synchronizer — Sequencer ──
+  sequencer:
+    image: digitalasset/canton-open-source:latest
+    depends_on:
+      postgres-sequencer:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+      - "5002:5002"  # Admin API
+    volumes:
+      - ./config/sequencer.conf:/canton/sequencer.conf:ro
+    environment:
+      POSTGRES_HOST: postgres-sequencer
+    restart: unless-stopped
+
+  # ── Global Synchronizer — Mediator ──
+  mediator:
+    image: digitalasset/canton-open-source:latest
+    depends_on:
+      postgres-mediator:
+        condition: service_healthy
+      sequencer:
+        condition: service_started
+    ports:
+      - "6001:6001"
+      - "6002:6002"  # Admin API
+    volumes:
+      - ./config/mediator.conf:/canton/mediator.conf:ro
+    environment:
+      POSTGRES_HOST: postgres-mediator
+    restart: unless-stopped
+
+  # ── Daml Shell (for testing and manual ledger interaction) ──
+  daml-shell:
+    image: digitalasset/daml-sdk:latest
+    depends_on:
+      participant1:
+        condition: service_started
+    volumes:
+      - ./daml:/workspace/daml:ro
+      - ./daml.yaml:/workspace/daml.yaml:ro
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    profiles:
+      - tools
+
+volumes:
+  pg_p1:
+  pg_p2:
+  pg_seq:
+  pg_med:

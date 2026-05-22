@@ -1,0 +1,12 @@
+module Main where
+
+-- | kredz.xyz Canton participant — DAML contract modules
+--   Version: 0.1.0
+--   Network: Canton Network (DevNet → TestNet → MainNet)
+--
+--   This file imports and re-exports all kredz DAML template modules.
+--   DAML's convention is that Main.daml is the package entry point.
+
+import KredzScore
+import KredzQuery
+import KredzSubscription

@@ -1,0 +1,61 @@
+module KredzSubscription where
+
+import DA.List
+import DA.Optional
+
+-- | Lender subscription to score change notifications for a list of borrowers.
+--   When a subscribed borrower's score changes by >= threshold, a Canton event is emitted.
+template KredzLenderSubscription
+  with
+    operator : Party
+    lender : Party
+    borrowerDids : [Text]          -- list of subscribed Midnight DIDs
+    threshold : Int                -- notify if score changes by >= threshold points
+    webhookUrl : Optional Text     -- optional REST API webhook endpoint
+  where
+    signatory operator, lender
+
+    -- | Add a borrower DID to the subscription list.
+    choice AddBorrower : ContractId KredzLenderSubscription
+      with
+        newDid : Text
+      controller lender
+      do
+        -- Prevent duplicate subscriptions for the same DID
+        assert (not (newDid `elem` borrowerDids))
+
+        create this with
+          borrowerDids = newDid :: borrowerDids
+
+    -- | Remove a borrower DID from the subscription list.
+    choice RemoveBorrower : ContractId KredzLenderSubscription
+      with
+        did : Text
+      controller lender
+      do
+        create this with
+          borrowerDids = filter (/= did) borrowerDids
+
+    -- | Update the notification threshold.
+    choice UpdateThreshold : ContractId KredzLenderSubscription
+      with
+        newThreshold : Int
+      controller lender
+      do
+        create this with
+          threshold = newThreshold
+
+    -- | Update the webhook URL.
+    choice UpdateWebhook : ContractId KredzLenderSubscription
+      with
+        newUrl : Optional Text
+      controller lender
+      do
+        create this with
+          webhookUrl = newUrl
+
+    -- | Archive this subscription (lender cancels).
+    choice Cancel : ()
+      controller lender
+      do
+        return ()

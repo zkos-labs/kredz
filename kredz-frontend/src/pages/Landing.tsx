@@ -37,7 +37,7 @@ const LAYERS = [
 const STATS = [
   { value: '1,000', label: 'Max Score', icon: TrendingUp },
   { value: '3', label: 'Privacy Tiers', icon: Shield },
-  { value: '0', label: 'Raw Data Exposed', icon: Lock },
+  { value: '2', label: 'Chains', icon: Lock },
   { value: '5+', label: 'Literacy Modules', icon: BookOpen },
 ];
 
@@ -92,8 +92,8 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
             className="font-inter text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Privacy-preserving AI credit scoring on Midnight. Prove your creditworthiness
-            without revealing your financial data — powered by Zero-Knowledge proofs.
+            Privacy-preserving AI credit scoring on Midnight, portable to Base and beyond.
+            Prove your creditworthiness without revealing your financial data — powered by Zero-Knowledge proofs.
           </motion.p>
 
           <motion.div
@@ -228,7 +228,7 @@ export default function Landing() {
               <span className="text-gradient">Without Sacrificing Privacy</span>
             </h2>
             <p className="font-inter text-white/40 mb-10 max-w-lg mx-auto leading-relaxed">
-              Connect your Lace wallet, select your privacy tier, and start building your KREDZ Score on Midnight today.
+              Connect your Lace wallet, link your Base wallet, select your privacy tier, and start building your KREDZ Score — provable on Midnight and Base.
             </p>
             <button
               onClick={handleLaunch}
@@ -252,7 +252,7 @@ export default function Landing() {
             <span className="font-manrope font-bold text-white/80">KREDZ</span>
           </div>
           <p className="font-inter text-xs text-white/25">
-            Built on Midnight Network · Privacy-preserving credit scoring · © 2026 KREDZ
+            Built on Midnight Network · Portable to Base · Privacy-preserving credit scoring · © 2026 KREDZ
           </p>
           <div className="flex gap-6">
             {['Docs', 'GitHub', 'Discord'].map(l => (
