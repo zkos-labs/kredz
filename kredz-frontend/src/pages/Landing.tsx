@@ -29,7 +29,7 @@ const TIERS = [
 ];
 
 const LAYERS = [
-  { icon: TrendingUp, title: 'On-Chain Signals', desc: 'Wallet age, DeFi interactions, repayment history across Midnight and Cardano.', weight: '40%' },
+  { icon: TrendingUp, title: 'On-Chain Signals', desc: 'Wallet age, DeFi interactions, repayment history across Midnight, Canton, Base, and Solana.', weight: '40%' },
   { icon: Shield, title: 'ZK-KYC Signals', desc: 'Real-world attributes proven via Midnight ZK-circuits. Income, identity. Without raw data exposure.', weight: '40%' },
   { icon: BookOpen, title: 'Behavioral Literacy', desc: 'Earn points completing verified financial literacy modules on DeFi mechanics and risk management.', weight: '20%' },
 ];

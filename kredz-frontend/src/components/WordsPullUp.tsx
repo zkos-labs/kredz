@@ -14,7 +14,7 @@ export function WordsPullUp({ text, className = '', delay = 0, staggerChildren =
   const words = text.split(' ');
 
   return (
-    <span ref={ref} className={`inline-flex flex-wrap ${className}`}>
+    <span ref={ref} className={`inline-flex flex-wrap justify-center ${className}`}>
       {words.map((word, i) => (
         <span key={i} className="inline-block overflow-hidden mr-[0.25em]">
           <motion.span
