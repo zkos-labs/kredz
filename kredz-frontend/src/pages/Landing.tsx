@@ -86,14 +86,14 @@ export default function Landing() {
           {/* Hero content */}
           <motion.div
             style={{ opacity: heroOpacity, y: heroY }}
-            className="absolute inset-0 z-10 flex flex-col justify-end p-6 md:p-12 pb-12 md:pb-16"
+            className="absolute inset-0 z-10 flex flex-col justify-end p-4 md:p-12 pb-16 md:pb-16"
           >
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8">
               {/* Heading */}
               <div className="md:col-span-8">
                 <WordsPullUp
                   text="The Credit Layer"
-                  className="text-[18vw] sm:text-[16vw] md:text-[14vw] lg:text-[12vw] xl:text-[11vw] font-medium leading-[0.88] tracking-[-0.05em] text-[#E1E0CC]"
+                  className="text-[16vw] sm:text-[14vw] md:text-[12vw] lg:text-[11vw] xl:text-[10vw] font-medium leading-[0.88] tracking-[-0.05em] text-[#E1E0CC]"
                 />
               </div>
 
@@ -142,8 +142,8 @@ export default function Landing() {
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section id="how-it-works" className="relative px-6 md:px-12 py-28 max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+      <section id="how-it-works" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
+        <div className="text-center mb-8 md:mb-16">
           <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Three-Layer Scoring</p>
           <WordsPullUp
             text="How KREDZ Scores You"
@@ -181,8 +181,8 @@ export default function Landing() {
       </section>
 
       {/* ═══ FOUR NETWORKS ═══ */}
-      <section id="networks" className="relative px-6 md:px-12 py-28 max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+      <section id="networks" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
+        <div className="text-center mb-8 md:mb-16">
           <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">One Score, Four Networks</p>
           <WordsPullUp
             text="Portable Across the Multi-Chain Web"
@@ -215,8 +215,8 @@ export default function Landing() {
       </section>
 
       {/* ═══ TIERS ═══ */}
-      <section id="tiers" className="relative px-6 md:px-12 py-28 max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+      <section id="tiers" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
+        <div className="text-center mb-8 md:mb-16">
           <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Privacy Tiers</p>
           <WordsPullUp
             text="Choose Your Privacy Level"
@@ -272,7 +272,7 @@ export default function Landing() {
       </section>
 
       {/* ═══ CTA ═══ */}
-      <section className="relative px-6 md:px-12 py-28 bg-noise">
+      <section className="relative px-4 md:px-12 py-16 md:py-28 bg-noise">
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center relative z-10"
@@ -315,7 +315,7 @@ export default function Landing() {
       </section>
 
       {/* ═══ FOOTER ═══ */}
-      <footer className="px-6 md:px-12 py-10 border-t border-[#DEDBC8]/5">
+      <footer className="px-4 md:px-12 py-10 border-t border-[#DEDBC8]/5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#DEDBC8] to-[#DEDBC8]/50 flex items-center justify-center">
@@ -323,8 +323,8 @@ export default function Landing() {
             </div>
             <span className="font-bold text-[#E1E0CC]">KREDZ</span>
           </div>
-          <p className="text-xs text-[#DEDBC8]/25">
-            Built on Midnight, Canton, Base, Solana, privacy-preserving credit scoring, &copy; 2026 KREDZ
+          <p className="text-xs text-[#DEDBC8]/25 text-center">
+            Midnight, Canton, Base, Solana &middot; Privacy-preserving credit scoring &middot; &copy; 2026 KREDZ
           </p>
           <div className="flex gap-6">
             {['Docs', 'GitHub', 'Discord'].map(l => (

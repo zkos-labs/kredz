@@ -49,10 +49,10 @@ export function Navbar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-4 flex items-center justify-center"
+      className="fixed top-0 left-0 right-0 z-50 px-3 md:px-12 py-3 md:py-4 flex items-center justify-center"
     >
       {/* Center pill container */}
-      <div className="bg-black rounded-full px-4 py-2 md:px-6 flex items-center gap-4 md:gap-8">
+      <div className="bg-black rounded-full px-3 py-1.5 md:px-6 md:py-2 flex items-center gap-2 md:gap-8">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <div className="w-6 h-6 rounded-md bg-[#DEDBC8] flex items-center justify-center">
