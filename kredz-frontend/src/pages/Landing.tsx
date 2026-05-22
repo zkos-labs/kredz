@@ -83,19 +83,6 @@ export default function Landing() {
           {/* Gradient overlay */}
           <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/50 via-transparent to-black/70" />
 
-          {/* Navbar pill */}
-          <nav className="absolute top-0 left-1/2 -translate-x-1/2 z-20 bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2 md:px-8">
-            <div className="flex items-center gap-3 sm:gap-6 md:gap-10 lg:gap-12">
-              {['How It Works', 'Networks', 'Tiers'].map(item => (
-                <a key={item} href={`#${item.toLowerCase().replace(/ /g, '-')}`}
-                  className="text-[10px] sm:text-xs md:text-sm font-medium transition-colors duration-200 hover:text-[#E1E0CC]"
-                  style={{ color: 'rgba(225, 224, 204, 0.7)' }}>
-                  {item}
-                </a>
-              ))}
-            </div>
-          </nav>
-
           {/* Hero content */}
           <motion.div
             style={{ opacity: heroOpacity, y: heroY }}
