@@ -232,7 +232,7 @@ export function LiteracyModules() {
                     {correctCount}/{module.quiz.length} Correct
                   </h4>
                   <p className="font-inter text-sm text-light/50 mb-6">
-                    You earned <span className="text-gold font-semibold">{Math.floor(module.xp * (correctCount / module.quiz.length))} XP</span> — submitting to Midnight…
+                    You earned <span className="text-gold font-semibold">{Math.floor(module.xp * (correctCount / module.quiz.length))} XP</span> - submitting to Midnight…
                   </p>
                   <button
                     onClick={claimXP}

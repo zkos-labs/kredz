@@ -203,7 +203,7 @@ export default function Dashboard() {
             <div className="w-full glass rounded-xl p-3 flex items-center gap-2">
               <Shield size={14} className="text-accent shrink-0" />
               <span className="text-xs font-inter text-light/50">
-                Tier {tierIdx} — ZK-verified on Midnight
+                Tier {tierIdx} - ZK-verified on Midnight
               </span>
             </div>
           </motion.div>
@@ -258,7 +258,7 @@ export default function Dashboard() {
           <span className="text-[10px] font-inter text-light/30">One score, four networks, zero repetition</span>
         </motion.div>
 
-        {/* Canton Status Card — shown when wallets are linked */}
+        {/* Canton Status Card - shown when wallets are linked */}
         {walletsLinked && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.34 }}
             className="glass rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-indigo-500/10">
@@ -299,7 +299,7 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Base Score Card — shown when wallets are linked */}
+        {/* Base Score Card - shown when wallets are linked */}
         {walletsLinked && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
             className="glass rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -334,7 +334,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <p className="font-inter text-sm text-light/40">
-                    No Base score yet — sync your score to bridge it.
+                    No Base score yet - sync your score to bridge it.
                   </p>
                 )}
               </div>
@@ -360,7 +360,7 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Solana Score Card — shown when wallets are linked */}
+        {/* Solana Score Card - shown when wallets are linked */}
         {walletsLinked && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
             className="glass rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -393,7 +393,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <p className="font-inter text-sm text-light/40">
-                    No Solana score yet — sync your score to bridge it.
+                    No Solana score yet - sync your score to bridge it.
                   </p>
                 )}
               </div>

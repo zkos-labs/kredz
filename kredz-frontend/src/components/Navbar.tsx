@@ -79,7 +79,7 @@ export function Navbar() {
       <div className="flex items-center gap-2">
         {wallet ? (
           <>
-            {/* Chain switcher — only show when wallets are linked */}
+            {/* Chain switcher - only show when wallets are linked */}
             {walletsLinked && (
               <div className="relative">
                 <button

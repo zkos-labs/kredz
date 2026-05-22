@@ -28,7 +28,7 @@ const TIERS = [
     borderHover: 'hover:border-accent/50',
     proof: 'attribute',
     proofLabel: 'Prove one attribute (e.g. income > $5k or age > 18)',
-    description: 'Prove a single real-world attribute via ZK-circuit. The attribute stays private — only the proof goes on-chain.',
+    description: 'Prove a single real-world attribute via ZK-circuit. The attribute stays private - only the proof goes on-chain.',
     features: ['All Anonymous features', 'ZK income attestation', 'ZK age verification', 'Mid-tier lending access'],
     highlight: true,
   },
@@ -40,7 +40,7 @@ const TIERS = [
     color: 'from-gold to-yellow-300',
     borderHover: 'hover:border-gold/50',
     proof: 'fullKyc',
-    proofLabel: 'Full KYC bundle (name, income, ID — all ZK-proven)',
+    proofLabel: 'Full KYC bundle (name, income, ID - all ZK-proven)',
     description: 'Full compliance via ZK-circuits. Unlock institutional liquidity pools and the maximum score range.',
     features: ['All Pseudonymous features', 'Full ZK-KYC bundle', 'Institutional pools', 'Maximum score range'],
   },
@@ -111,7 +111,7 @@ export default function TierSelection() {
             Choose Your Privacy Tier
           </h1>
           <p className="font-inter text-light/50 max-w-xl mx-auto">
-            Select how much you want to prove. Your data stays private — only ZK proofs go on-chain.
+            Select how much you want to prove. Your data stays private - only ZK proofs go on-chain.
           </p>
         </motion.div>
 
@@ -178,11 +178,11 @@ export default function TierSelection() {
                 <Lock size={24} className="text-gold" />
                 <div>
                   <h2 className="font-manrope font-bold text-xl text-light">ZK Proof Required</h2>
-                  <p className="font-inter text-xs text-light/40">Tier {selectedTier.id} — {selectedTier.name}</p>
+                  <p className="font-inter text-xs text-light/40">Tier {selectedTier.id} - {selectedTier.name}</p>
                 </div>
               </div>
               <p className="font-inter text-sm text-light/60 mb-6 leading-relaxed">
-                {selectedTier.proofLabel}. Your input is processed locally and only a ZK proof is submitted to Midnight — your raw data never leaves your device.
+                {selectedTier.proofLabel}. Your input is processed locally and only a ZK proof is submitted to Midnight - your raw data never leaves your device.
               </p>
               <label className="block font-inter text-xs text-light/50 mb-2 uppercase tracking-wider">
                 {selectedTier.id === 1 ? 'Attribute Value (e.g. "income:8000" or "age:25")' : 'KYC Bundle (e.g. "name:John,income:8000,id:verified")'}
