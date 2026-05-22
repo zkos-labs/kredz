@@ -67,7 +67,7 @@ export function Navbar() {
 
       {/* Desktop nav */}
       <div className="hidden md:flex items-center gap-8">
-        {['How It Works', 'Tiers', 'Score'].map(link => (
+        {['How It Works', 'Networks', 'Tiers'].map(link => (
           <a key={link} href={`#${link.toLowerCase().replace(/ /g, '-')}`}
             className="text-sm font-inter text-light/60 hover:text-light transition-colors">
             {link}
@@ -150,7 +150,7 @@ export function Navbar() {
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-full left-4 right-4 glass rounded-2xl p-6 flex flex-col gap-4 md:hidden"
         >
-          {['How It Works', 'Tiers', 'Score'].map(link => (
+          {['How It Works', 'Networks', 'Tiers'].map(link => (
             <a key={link} href={`#${link.toLowerCase().replace(/ /g, '-')}`}
               onClick={() => setMenuOpen(false)}
               className="text-light/70 hover:text-light font-inter text-sm">

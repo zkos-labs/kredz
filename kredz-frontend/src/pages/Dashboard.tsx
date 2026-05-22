@@ -249,6 +249,56 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
+        {/* ── NETWORK SCORE CARDS ── */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.33 }}
+          className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="font-manrope font-bold text-sm text-light/60 uppercase tracking-wider">Your Score Across Networks</span>
+          </div>
+          <span className="text-[10px] font-inter text-light/30">One score, four networks, zero repetition</span>
+        </motion.div>
+
+        {/* Canton Status Card — shown when wallets are linked */}
+        {walletsLinked && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.34 }}
+            className="glass rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-indigo-500/10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                <Link2 size={20} className="text-indigo-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-manrope font-bold text-light">Canton</span>
+                  <span className="text-[10px] font-inter font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/20 text-indigo-300">
+                    Institutional
+                  </span>
+                  {tierIdx >= 2 && (
+                    <span className="text-[10px] font-inter font-semibold px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/20 text-green-300">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <p className="font-inter text-sm text-light/40">
+                  {tierIdx >= 2
+                    ? 'Your score is available to institutional lenders on Canton via sub-transaction privacy. Lenders query your score confidentially.'
+                    : tierIdx >= 1
+                    ? 'Upgrade to Tier 2 (Full Compliance) to unlock Canton Network access for institutional lenders.'
+                    : 'Canton access unlocks at Tier 2. Build your score and complete KYC to reach institutional lenders.'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <a
+                href="https://canton.network"
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl glass text-xs font-inter text-light/60 hover:text-light transition-colors"
+              >
+                Learn about Canton <ExternalLink size={12} />
+              </a>
+            </div>
+          </motion.div>
+        )}
+
         {/* Base Score Card — shown when wallets are linked */}
         {walletsLinked && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}

@@ -1,7 +1,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Shield, Zap, BookOpen, Lock, TrendingUp, Users } from 'lucide-react';
+import { ArrowRight, Shield, Zap, BookOpen, TrendingUp, Users, Network, Globe } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { BlurIn } from '../components/BlurIn';
 import { toast } from '../components/Toast';
@@ -10,34 +10,37 @@ const TIERS = [
   {
     id: 0, name: 'Anonymous', range: '0 – 400',
     badge: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-    features: ['On-chain wallet analysis', 'Transaction history scoring', 'DeFi interaction tracking', 'Micro-lending access'],
+    features: ['On-chain wallet analysis', 'Transaction history scoring', 'DeFi interaction tracking', 'Literacy modules'],
     proof: 'No personal data required',
+    networks: 'Midnight · Base · Solana',
   },
   {
     id: 1, name: 'Pseudonymous', range: '0 – 650',
     badge: 'bg-accent/20 text-gold border-accent/30',
     features: ['All Tier 0 features', 'ZK-proof of one attribute', 'Income or age attestation', 'Mid-tier lending access'],
     proof: 'Prove one attribute via ZK',
+    networks: 'Midnight · Base · Solana',
     highlight: true,
   },
   {
     id: 2, name: 'Full Compliance', range: '0 – 1000',
     badge: 'bg-gold/20 text-yellow-300 border-gold/30',
-    features: ['All Tier 1 features', 'Full ZK-KYC bundle', 'Institutional liquidity pools', 'Maximum score range'],
+    features: ['All Tier 1 features', 'Full ZK-KYC bundle', 'Canton institutional lenders', 'MiCA / GENIUS Act compliant'],
     proof: 'Full KYC via ZK circuits',
+    networks: 'Midnight · Canton · Base · Solana',
   },
 ];
 
 const LAYERS = [
   { icon: TrendingUp, title: 'On-Chain Signals', desc: 'Wallet age, DeFi interactions, repayment history across Midnight & Cardano.', weight: '40%' },
-  { icon: Lock, title: 'ZK-KYC Signals', desc: 'Real-world attributes proven via Midnight ZK-circuits — income, identity — without raw data exposure.', weight: '40%' },
+  { icon: Shield, title: 'ZK-KYC Signals', desc: 'Real-world attributes proven via Midnight ZK-circuits — income, identity — without raw data exposure.', weight: '40%' },
   { icon: BookOpen, title: 'Behavioral Literacy', desc: 'Earn points completing verified financial literacy modules on DeFi mechanics and risk management.', weight: '20%' },
 ];
 
 const STATS = [
   { value: '1,000', label: 'Max Score', icon: TrendingUp },
   { value: '3', label: 'Privacy Tiers', icon: Shield },
-  { value: '2', label: 'Chains', icon: Lock },
+  { value: '4', label: 'Networks', icon: Network },
   { value: '5+', label: 'Literacy Modules', icon: BookOpen },
 ];
 
@@ -76,7 +79,7 @@ export default function Landing() {
             style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}
           >
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="font-inter">Midnight Mainnet Live</span>
+              <span className="font-inter">Midnight · Canton · Base · Solana</span>
           </motion.div>
 
           <motion.h1
@@ -92,8 +95,9 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
             className="font-inter text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Privacy-preserving AI credit scoring on Midnight, portable to Base and beyond.
-            Prove your creditworthiness without revealing your financial data — powered by Zero-Knowledge proofs.
+            Privacy-preserving AI credit scoring across four networks.
+            Build your score on Midnight — use it on Canton, Base, and Solana.
+            ZK proofs protect your data. Sub-transaction privacy protects your lenders.
           </motion.p>
 
           <motion.div
@@ -174,6 +178,36 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── FOUR-NETWORK ARCHITECTURE ── */}
+      <section id="networks" className="relative px-6 md:px-12 py-28 max-w-6xl mx-auto">
+        <BlurIn className="text-center mb-16">
+          <p className="font-inter text-sm text-accent uppercase tracking-widest mb-3">One Score, Four Networks</p>
+          <h2 className="font-manrope font-extrabold text-4xl md:text-5xl text-white">Portable Across the Multi-Chain Web</h2>
+          <p className="font-inter text-white/40 mt-4 max-w-2xl mx-auto">
+            Build your credit identity once on Midnight. Your score flows to wherever lenders operate — institutional lenders on Canton, DeFi protocols on Base, and SVM apps on Solana.
+          </p>
+        </BlurIn>
+        <div className="grid md:grid-cols-4 gap-4">
+          {[
+            { name: 'Midnight', role: 'Credit Identity', desc: 'ZK proofs protect your data. Selective disclosure — prove without revealing.', color: 'text-purple-300', dot: 'bg-purple-400', border: 'border-purple-500/20' },
+            { name: 'Canton', role: 'Institutional Lenders', desc: 'Sub-transaction privacy. Regulated lenders query scores confidentially.', color: 'text-indigo-300', dot: 'bg-indigo-400', border: 'border-indigo-500/20' },
+            { name: 'Base', role: 'EVM DeFi', desc: 'ERC-8004 SBT badge. Any lending protocol reads your score on-chain.', color: 'text-blue-300', dot: 'bg-blue-400', border: 'border-blue-500/20' },
+            { name: 'Solana', role: 'SVM DeFi', desc: 'ScoreBadge PDA with Ed25519 verification. Score works in Solana ecosystem.', color: 'text-green-300', dot: 'bg-green-400', border: 'border-green-500/20' },
+          ].map((net, i) => (
+            <BlurIn key={net.name} delay={i * 0.1}>
+              <div className={`glass rounded-3xl p-6 h-full flex flex-col gap-3 transition-all hover:scale-[1.02] ${net.border}`}>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${net.dot}`} />
+                  <span className={`font-manrope font-bold text-xs uppercase tracking-wider ${net.color}`}>{net.name}</span>
+                </div>
+                <p className="font-inter text-xs text-white/60 leading-relaxed flex-1">{net.desc}</p>
+                <span className="font-inter text-[10px] text-white/30">{net.role}</span>
+              </div>
+            </BlurIn>
+          ))}
+        </div>
+      </section>
+
       {/* ── TIERS ── */}
       <section id="tiers" className="relative px-6 md:px-12 py-28 max-w-6xl mx-auto">
         <BlurIn className="text-center mb-16">
@@ -212,6 +246,10 @@ export default function Landing() {
                   <Shield size={14} className="text-accent shrink-0" />
                   <span className="text-xs font-inter text-white/50">{tier.proof}</span>
                 </div>
+                <div className="flex items-center gap-1.5">
+                  <Globe size={11} className="text-white/25" />
+                  <p className="text-[10px] font-inter text-white/25">{tier.networks}</p>
+                </div>
               </div>
             </BlurIn>
           ))}
@@ -228,7 +266,7 @@ export default function Landing() {
               <span className="text-gradient">Without Sacrificing Privacy</span>
             </h2>
             <p className="font-inter text-white/40 mb-10 max-w-lg mx-auto leading-relaxed">
-              Connect your Lace wallet, link your Base wallet, select your privacy tier, and start building your KREDZ Score — provable on Midnight and Base.
+              Connect your Lace wallet, link Base + Solana + Canton, select your tier, and start building your KREDZ Score — provable across four networks.
             </p>
             <button
               onClick={handleLaunch}
@@ -252,7 +290,7 @@ export default function Landing() {
             <span className="font-manrope font-bold text-white/80">KREDZ</span>
           </div>
           <p className="font-inter text-xs text-white/25">
-            Built on Midnight Network · Portable to Base · Privacy-preserving credit scoring · © 2026 KREDZ
+            Built on Midnight · Canton · Base · Solana · Privacy-preserving credit scoring · © 2026 KREDZ
           </p>
           <div className="flex gap-6">
             {['Docs', 'GitHub', 'Discord'].map(l => (
