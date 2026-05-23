@@ -11,25 +11,25 @@ const TIERS = [
     id: 0, name: 'Anonymous', range: '0-400',
     features: ['On-chain wallet analysis', 'Transaction history scoring', 'DeFi interaction tracking', 'Literacy modules'],
     proof: 'No personal data required',
-    networks: 'Midnight, Base, Solana',
+    networks: 'Midnight, Base, Solana, Cardano',
   },
   {
     id: 1, name: 'Pseudonymous', range: '0-650',
     features: ['All Tier 0 features', 'ZK-proof of one attribute', 'Income or age attestation', 'Mid-tier lending access'],
     proof: 'Prove one attribute via ZK',
-    networks: 'Midnight, Base, Solana',
+    networks: 'Midnight, Base, Solana, Cardano',
     highlight: true,
   },
   {
     id: 2, name: 'Full Compliance', range: '0-1000',
     features: ['All Tier 1 features', 'Full ZK-KYC bundle', 'Canton institutional lenders', 'MiCA / GENIUS Act compliant'],
     proof: 'Full KYC via ZK circuits',
-    networks: 'Midnight, Canton, Base, Solana',
+    networks: 'Midnight, Canton, Base, Solana, Cardano',
   },
 ];
 
 const LAYERS = [
-  { icon: TrendingUp, title: 'On-Chain Signals', desc: 'Wallet age, DeFi interactions, repayment history across Midnight, Canton, Base, and Solana.', weight: '40%' },
+  { icon: TrendingUp, title: 'On-Chain Signals', desc: 'Wallet age, DeFi interactions, repayment history across Midnight, Canton, Base, Solana, and Cardano.', weight: '40%' },
   { icon: Shield, title: 'ZK-KYC Signals', desc: 'Real-world attributes proven via Midnight ZK-circuits. Income, identity. Without raw data exposure.', weight: '40%' },
   { icon: BookOpen, title: 'Behavioral Literacy', desc: 'Earn points completing verified financial literacy modules on DeFi mechanics and risk management.', weight: '20%' },
 ];
@@ -39,6 +39,7 @@ const NETWORKS = [
   { name: 'Canton', role: 'Institutional Lenders', desc: 'Sub-transaction privacy. Regulated lenders query scores confidentially.', dot: 'bg-indigo-400' },
   { name: 'Base', role: 'EVM DeFi', desc: 'ERC-8004 SBT badge. Any lending protocol reads your score on-chain.', dot: 'bg-blue-400' },
   { name: 'Solana', role: 'SVM DeFi', desc: 'ScoreBadge PDA with Ed25519 verification.', dot: 'bg-emerald-400' },
+  { name: 'Cardano', role: 'Native Chain', desc: 'Midnight partner chain. Blockfrost indexer for wallet history analysis.', dot: 'bg-blue-500' },
 ];
 
 export default function Landing() {
@@ -104,7 +105,7 @@ export default function Landing() {
                   transition={{ delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="text-[#DEDBC8]/70 text-xs md:text-sm leading-[1.4]"
                 >
-                  Privacy-preserving AI credit scoring across Midnight, Canton, Base, and Solana. Build your score once. Use it everywhere. ZK proofs protect your data. Sub-transaction privacy protects your lenders.
+                  Privacy-preserving AI credit scoring across five networks. Build your score once. Use it everywhere. ZK proofs protect your data. Sub-transaction privacy protects your lenders.
                 </motion.p>
 
                 <motion.div
@@ -183,7 +184,7 @@ export default function Landing() {
       {/* ═══ FOUR NETWORKS ═══ */}
       <section id="networks" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
         <div className="text-center mb-8 md:mb-16">
-          <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">One Score, Four Networks</p>
+          <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">One Score, Five Networks</p>
           <WordsPullUp
             text="Portable Across the Multi-Chain Web"
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-[#E1E0CC] leading-[0.95]"
@@ -196,7 +197,7 @@ export default function Landing() {
             Build your credit identity once on Midnight. Your score flows to wherever lenders operate.
           </motion.p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
           {NETWORKS.map((net, i) => (
             <motion.div key={net.name}
               initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
@@ -294,7 +295,7 @@ export default function Landing() {
             transition={{ delay: 0.4 }}
             className="text-[#DEDBC8]/40 mt-4 mb-10 max-w-lg mx-auto text-sm leading-relaxed"
           >
-            Connect your Lace wallet, link Base, Solana, Canton, select your tier, and start building your KREDZ Score, provable across four networks.
+            Connect your Lace wallet, link Base, Solana, Canton, select your tier, and start building your KREDZ Score, provable across five networks.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -324,7 +325,7 @@ export default function Landing() {
             <span className="font-bold text-[#E1E0CC]">KREDZ</span>
           </div>
           <p className="text-xs text-[#DEDBC8]/25 text-center">
-            Midnight, Canton, Base, Solana &middot; Privacy-preserving credit scoring &middot; &copy; 2026 KREDZ
+            Midnight, Canton, Base, Solana, Cardano &middot; Privacy-preserving credit scoring &middot; &copy; 2026 KREDZ
           </p>
           <div className="flex gap-6">
             {['Docs', 'GitHub', 'Discord'].map(l => (

@@ -255,7 +255,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <span className="font-manrope font-bold text-sm text-light/60 uppercase tracking-wider">Your Score Across Networks</span>
           </div>
-          <span className="text-[10px] font-inter text-light/30">One score, four networks, zero repetition</span>
+          <span className="text-[10px] font-inter text-light/30">One score, five networks, zero repetition</span>
         </motion.div>
 
         {/* Canton Status Card - shown when wallets are linked */}

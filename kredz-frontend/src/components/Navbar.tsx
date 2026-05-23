@@ -72,7 +72,7 @@ export function Navbar() {
           ))}
           {walletsLinked && (
             <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#DEDBC8]/10 text-[#DEDBC8]/60">
-              4 Networks
+              5 Networks
             </span>
           )}
         </div>

@@ -1,6 +1,6 @@
 # kredz.xyz
 ## Product Requirements Document — Full Stack
-### Midnight Network × Canton Network × Base (EVM)
+### Midnight Network × Canton Network × Base (EVM) × Solana × Cardano
 
 **Version:** 0.2
 **Status:** Active Draft

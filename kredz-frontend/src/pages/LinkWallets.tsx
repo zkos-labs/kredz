@@ -120,10 +120,10 @@ export default function LinkWallets() {
     <div className="min-h-screen pt-24 px-6 pb-16 flex items-center justify-center relative bg-transparent">
       <div className="w-full max-w-lg relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-          <p className="font-inter text-sm text-accent uppercase tracking-widest mb-3">Four-Network Identity</p>
+          <p className="font-inter text-sm text-accent uppercase tracking-widest mb-3">Five-Network Identity</p>
           <h1 className="font-manrope font-extrabold text-4xl text-light mb-3">Link Your Wallets</h1>
           <p className="font-inter text-light/50 text-sm leading-relaxed max-w-sm mx-auto">
-            Connect your Midnight, Base, and Solana wallets to create a unified KREDZ identity. Your score will be provable across all four networks - Midnight for scoring, Canton for institutions, Base and Solana for DeFi.
+            Connect your Midnight, Base, and Solana wallets to create a unified KREDZ identity. Your score will be provable across all five networks - Midnight for scoring, Canton for institutions, Base, Solana, and Cardano for DeFi.
           </p>
         </motion.div>
 
@@ -161,7 +161,7 @@ export default function LinkWallets() {
           className="glass rounded-xl p-4 flex items-start gap-3 mb-6">
           <AlertCircle size={15} className="text-accent shrink-0 mt-0.5" />
           <p className="font-inter text-xs text-light/50 leading-relaxed">
-            Linking stores your Base and Solana addresses on Midnight via ZK circuits. Your KREDZ Score will be bridged to all four networks automatically - Base and Solana via the attestation relayer, Canton via the KredzScore DAML contract when you reach Tier 2.
+            Linking stores your Base and Solana addresses on Midnight via ZK circuits. Your KREDZ Score will be bridged to all five networks automatically - Base and Solana via the attestation relayer, Canton via the KredzScore DAML contract when you reach Tier 2.
           </p>
         </motion.div>
 

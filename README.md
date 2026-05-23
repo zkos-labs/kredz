@@ -1,6 +1,6 @@
 # KREDZ — Privacy-Preserving Credit Identity Protocol
 
-**Midnight Network × Canton Network × Base (EVM) × Solana**
+**Midnight Network × Canton Network × Base (EVM) × Solana × Cardano**
 
 > kredz.xyz bridges crypto-native users to institutional lenders through dual-privacy credit scoring: ZK proofs on Midnight + sub-transaction privacy on Canton.
 
@@ -10,6 +10,7 @@
 | Canton | Institutional lenders · Compliance | DAML | Written, needs DevNet |
 | Base | EVM portability · DeFi oracle | Solidity | Code complete |
 | Solana | SVM portability · Score PDA | Anchor (Rust) | Written, Anchor v0.31 fix needed |
+| Cardano | Partner chain · Wallet history | Blockfrost API | Integrated for Layer 1 scoring |
 
 ---
 
@@ -29,16 +30,16 @@
                │  • Financial literacy XP  │
                └───────────┬───────────────┘
                            │ ZK attestation
-              ┌────────────┼────────────────┐
+              ┌────────────┼────────────────┐────────────┐
               ▼            ▼                 ▼
    ┌──────────────────┐ ┌──────────────────────┐ ┌──────────────────┐
-   │   BASE (EVM)      │ │   CANTON NETWORK     │ │  SOLANA (SVM)     │
-   │   Public Port.    │ │   Institutional      │ │  SVM Portability  │
-   │   ─────────────   │ │   ────────────────── │ │  ──────────────   │
-   │   • ERC-8004 SBT  │ │   • Sub-tx privacy   │ │  • ScoreBadge PDA │
-   │   • IKredzOracle  │ │   • KredzScore DAML  │ │  • Ed25519 verify │
-   │   • Relayer bridge│ │   • QueryScore       │ │  • Phantom wallet │
-   └──────────────────┘ │   • KredzAuditLog    │ └──────────────────┘
+   │   BASE (EVM)      │ │   CANTON NETWORK     │ │  SOLANA (SVM)     │ │   CARDANO          │
+   │   Public Port.    │ │   Institutional      │ │  SVM Portability  │ │   Partner Chain    │
+   │   ─────────────   │ │   ────────────────── │ │  ──────────────   │ │   ─────────────   │
+   │   • ERC-8004 SBT  │ │   • Sub-tx privacy   │ │  • ScoreBadge PDA │ │  • Blockfrost idx  │
+   │   • IKredzOracle  │ │   • KredzScore DAML  │ │  • Ed25519 verify │ │  • Native L1 hist  │
+   │   • Relayer bridge│ │   • QueryScore       │ │  • Phantom wallet │ │  • Lace wallet     │
+   └──────────────────┘ │   • KredzAuditLog    │ └──────────────────┘ └──────────────────┘
                          └──────────────────────┘
 ```
 
@@ -49,14 +50,15 @@
 | **Base** | Code complete (needs deploy) | Public EVM | Solidity + ERC-8004 |
 | **Solana** | Written, Anchor v0.31 fix needed | Public SVM | Anchor (Rust) |
 
-### Why Four Networks?
+### Why Five Networks?
 
 **Midnight** — ZK-native credit scoring. Borrowers prove creditworthiness without exposing raw data.
 **Canton** — Institutional credit distribution. Lenders query scores privately via sub-transaction privacy.
 **Base** — EVM composability. Any DeFi protocol can read a borrower's score on-chain via `IKredzOracle`.
 **Solana** — SVM composability. ScoreBadge PDA + Ed25519 verification for the Solana DeFi ecosystem.
+**Cardano** — Midnight's partner chain. Blockfrost-indexed wallet history enriches Layer 1 scoring signals natively.
 
-One identity, four networks, zero repetition of the onboarding process.
+One identity, five networks, zero repetition of the onboarding process.
 
 ## Quick Start
 
@@ -227,6 +229,7 @@ kredz/
 | Privacy Contracts | DAML | Canton |
 | EVM Contracts | Solidity + Foundry | Base |
 | SVM Contracts | Anchor (Rust) | Solana |
+| Native Chain | Blockfrost API | Cardano |
 | Frontend | React 19 + Vite + Tailwind v4 | — |
 | Backend | Node.js + Express + TypeScript | — |
 | ML Model | Python + XGBoost | — |
@@ -240,7 +243,7 @@ Built for the **Build on Canton Hackathon** (June 2026) by Encode Club, powered 
 
 **Track:** Private DeFi & Capital Markets — Confidential lending, private credit scoring, institutional compliance.
 
-**Our differentiation:** kredz.xyz is the only credit protocol demonstrating **dual-privacy** — ZK proofs on Midnight for borrower privacy AND sub-transaction privacy on Canton for institutional lender confidentiality. And the only credit protocol spanning **four networks** — Midnight, Canton, Base, and Solana — from a single onboarding flow.
+**Our differentiation:** kredz.xyz is the only credit protocol demonstrating **dual-privacy** — ZK proofs on Midnight for borrower privacy AND sub-transaction privacy on Canton for institutional lender confidentiality. And the only credit protocol spanning **five networks** — Midnight, Canton, Base, Solana, and Cardano — from a single onboarding flow.
 
 ---
 
@@ -251,6 +254,7 @@ Built for the **Build on Canton Hackathon** (June 2026) by Encode Club, powered 
 | Midnight | `kredz.compact` | Written | `compact` CLI toolchain to compile |
 | Canton | 4 DAML templates | Written | Nix + Docker for cn-quickstart / DevNet access |
 | Base | 2 Solidity contracts | Code complete | Deploy to Base Sepolia, wire relayer |
-| Solana | Anchor program (125 LOC) | Written | Fix Anchor v0.31 compatibility (`anchor build` fails) |
+| Cardano | Blockfrost API | Integrated | Blockfrost API key for wallet history |
+| Solana | Anchor program (125 LOC) | Written | Fix Anchor v0.31 compatibility |
 
-**All four networks** share one scoring model and one user identity. The bottleneck is toolchain access (Midnight Compiler, Canton Nix/Docker, Anchor versioning) — the contract logic and frontend integration are complete.
+**All five networks** share one scoring model and one user identity. The bottleneck is toolchain access (Midnight Compiler, Canton Nix/Docker, Anchor versioning) — the contract logic and frontend integration are complete.

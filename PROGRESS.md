@@ -1,7 +1,7 @@
 # KREDZ — Development Progress
 
-**Project:** KREDZ — Privacy-preserving credit scoring on Midnight + Canton + Base
-**Stack:** React 18 + Vite + TypeScript + Tailwind CSS v4 + Framer Motion (frontend) / Node.js + Express + Python + XGBoost (backend) / Compact + DAML + Solidity (contracts)
+**Project:** KREDZ — Privacy-preserving credit scoring across Midnight, Canton, Base, Solana, and Cardano
+**Stack:** React 18 + Vite + TypeScript + Tailwind CSS v4 + Framer Motion (frontend) / Node.js + Express + Python + XGBoost (backend) / Compact + DAML + Solidity + Anchor + Blockfrost (5 networks)
 **Design:** Premium dark finance aesthetic with cinematic animated background (gold/amber, glassmorphism)
 **Started:** 2026-04-29
 **Last Updated:** 2026-05-22
