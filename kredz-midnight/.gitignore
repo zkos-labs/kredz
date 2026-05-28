@@ -1,0 +1,7 @@
+node_modules/
+dist/
+contracts/managed/
+public/contract/
+.DS_Store
+*.local
+.env
