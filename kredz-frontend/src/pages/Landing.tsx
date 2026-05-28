@@ -289,6 +289,7 @@ export default function Landing() {
               </div>
               <p className="text-xs text-[#DEDBC8]/60 leading-relaxed">Dust-free Midnight wallet. Zero NIGHT for gas — ProofStation sponsors all ZK proving and transaction fees server-side.</p>
               <a href="https://1am.xyz" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">1am.xyz</a>
+              <a href="https://1am.xyz/developers" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">Developer docs</a>
             </div>
             <div className="bg-[#101010] rounded-3xl p-5 md:p-6 flex flex-col gap-3 hover:bg-[#151515] transition-colors">
               <div className="flex items-center gap-2">
@@ -297,6 +298,7 @@ export default function Landing() {
               </div>
               <p className="text-xs text-[#DEDBC8]/60 leading-relaxed">Multichain sync engine by Midnight Foundation. Reads events from all 5 networks into a unified state machine. Replaces manual indexer polling.</p>
               <a href="https://github.com/effectstream/effectstream" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">github.com/effectstream</a>
+              <a href="https://effectstream.github.io/docs" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">Docs</a>
             </div>
           </div>
         </div>
