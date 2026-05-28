@@ -4,37 +4,28 @@
 //
 // ZK keys must be hosted on a CDN with CORS for FetchZkConfigProvider.
 // For local dev, point FetchZkConfigProvider to the /contracts/managed/kredz path.
-import { buildProviders } from './providers';
 import type { ConnectedWallet } from '../hooks/useMidnightWallet';
 import type { KredzContractAPI } from '../contracts/kredz';
 
 export async function deployKredzContract(wallet: ConnectedWallet): Promise<KredzContractAPI> {
-  const providers = await buildProviders(wallet);
-
-  // When deployed to a real Midnight network (preview/preprod/mainnet),
-  // use @midnight-ntwrk/midnight-js-contracts to deploy the compiled contract:
+  // buildProviders() is skipped in production because @midnight-ntwrk/* packages
+  // are marked as external in vite.config.ts (WASM/Node.js modules don't bundle).
+  // The real deploy would use them — but the mock contract API doesn't need providers.
   //
-  // import { CompiledContract } from '@midnight-ntwrk/compact-js';
-  // import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
-  // import { Contract as Kredz } from '../contracts/managed/kredz/contract';
-  //
-  // const compiled = CompiledContract.make('Kredz', Kredz).pipe(
-  //   CompiledContract.withVacantWitnesses,
-  //   CompiledContract.withCompiledFileAssets('/contracts/managed/kredz'),
-  // );
-  // const deployed = await deployContract(providers, { compiledContract: compiled });
-  // console.log('Contract deployed:', deployed.deployTxData.public.contractAddress);
+  // When ready for real deploy on Midnight:
+  //   const providers = await buildProviders(wallet);
+  //   const compiled = CompiledContract.make('Kredz', Kredz).pipe(...);
+  //   const deployed = await deployContract(providers, { compiledContract: compiled });
 
-  void providers; // providers used when real deploy is active
+  void wallet;
 
   const mockAddress = `mock_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  console.log('[KREDZ] Using mock contract at:', mockAddress, '(compiled ZK keys available)');
+  console.log('[KREDZ] Using mock contract at:', mockAddress);
   return createMockAPI(mockAddress);
 }
 
 export async function joinKredzContract(wallet: ConnectedWallet, address: string): Promise<KredzContractAPI> {
-  const providers = await buildProviders(wallet);
-  void providers;
+  void wallet;
   void address;
   return createMockAPI(address);
 }

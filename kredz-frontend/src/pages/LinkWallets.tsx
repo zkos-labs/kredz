@@ -59,8 +59,9 @@ export default function LinkWallets() {
       toast('All wallets linked! Your KREDZ identity is now five-chain.', 'success');
       navigate('/app/tier');
     } catch (err) {
-      console.error(err);
-      toast('Linking failed. Please try again.', 'error');
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[LinkWallets] Linking failed:', err);
+      toast(`Linking failed: ${msg}`, 'error');
     } finally { setLinking(false); }
   }
 
