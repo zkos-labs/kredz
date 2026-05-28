@@ -79,7 +79,7 @@ export default function LinkWallets() {
 
   const walletCards = [
     {
-      label: 'Midnight (Lace)',
+      label: 'Midnight (1AM)',
       letter: 'M',
       gradient: 'from-purple-500/20 to-blue-500/20',
       border: 'border-purple-500/20',

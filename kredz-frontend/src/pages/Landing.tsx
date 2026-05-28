@@ -324,7 +324,7 @@ export default function Landing() {
             transition={{ delay: 0.4 }}
             className="text-[#DEDBC8]/40 mt-4 mb-10 max-w-lg mx-auto text-sm leading-relaxed"
           >
-            Connect your Lace wallet, link Base, Solana, Canton, select your tier, and start building your KREDZ Score, provable across five networks.
+            Connect your 1AM wallet, link Base, Solana, Canton, select your tier, and start building your KREDZ Score, provable across five networks.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}

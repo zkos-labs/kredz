@@ -47,7 +47,7 @@ const MODULES = [
     quiz: [
       { q: 'What is Midnight\'s smart contract language?', options: ['Solidity', 'Rust', 'Compact', 'Move'], answer: 2 },
       { q: 'What does DPC stand for in Midnight?', options: ['Decentralized Private Computation', 'Digital Payment Chain', 'Distributed Proof Circuit', 'Dynamic Protocol Core'], answer: 0 },
-      { q: 'Which wallet is used for Midnight?', options: ['MetaMask', 'Phantom', 'Lace Beta', 'Eternl'], answer: 2 },
+      { q: 'Which wallet is used for Midnight?', options: ['MetaMask', 'Phantom', '1AM', 'Eternl'], answer: 2 },
     ],
   },
   {

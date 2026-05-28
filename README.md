@@ -17,7 +17,7 @@
 ## Architecture
 
 ```
-                    BORROWER (Lace Wallet)
+                    BORROWER (1AM Wallet)
                            │
                            ▼
                ┌─────────────────────────┐
@@ -38,7 +38,7 @@
    │   ─────────────   │ │   ────────────────── │ │  ──────────────   │ │   ─────────────   │
    │   • ERC-8004 SBT  │ │   • Sub-tx privacy   │ │  • ScoreBadge PDA │ │  • Blockfrost idx  │
    │   • IKredzOracle  │ │   • KredzScore DAML  │ │  • Ed25519 verify │ │  • Native L1 hist  │
-   │   • Relayer bridge│ │   • QueryScore       │ │  • Phantom wallet │ │  • Lace wallet     │
+   │   • Relayer bridge│ │   • QueryScore       │ │  • Phantom wallet │ │  • 1AM wallet      │
    └──────────────────┘ │   • KredzAuditLog    │ └──────────────────┘ └──────────────────┘
                          └──────────────────────┘
 ```
@@ -67,7 +67,7 @@ One identity, five networks, zero repetition of the onboarding process.
 | Tool | Why |
 |------|-----|
 | Node.js 20+ | Frontend (React) + Backend (Express) |
-| Lace Beta Wallet | Midnight connection |
+| 1AM Wallet | Midnight connection (dust-free) |
 | MetaMask | Base connection |
 | Docker 24+ | Canton LocalNet |
 | Python 3.10+ | Scoring engine ML model |
@@ -158,7 +158,7 @@ The KREDZ Score (0–1000) fuses signals from privacy-preserving ZK proofs, on-c
 ### Demo Flow
 
 ```
-1. Borrower connects Lace wallet on Midnight
+1. Borrower connects 1AM wallet on Midnight
 2. Selects privacy tier, builds KREDZ Score (layers 1-3)
 3. Score attested via ZK proof → proof hash stored on Midnight
 4. Backend syncs attestation to Canton → KredzScore contract created
