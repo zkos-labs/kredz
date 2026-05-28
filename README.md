@@ -2,12 +2,12 @@
 
 **Midnight Network × Canton Network × Base (EVM) × Solana × Cardano**
 
-> kredz.xyz bridges crypto-native users to institutional lenders through dual-privacy credit scoring: ZK proofs on Midnight + sub-transaction privacy on Canton.
+> kredz.xyz bridges crypto-native users to institutional lenders through dual-privacy credit scoring: ZK proofs on Midnight + sub-transaction privacy on Zenith EVM (Canton).
 
 | Network | Role | Contract Language | Status |
 |---------|------|-------------------|--------|
 | Midnight | Credit identity · ZK scoring | Compact | Written, needs compile |
-| Canton | Institutional lenders · Compliance | DAML | Written, needs DevNet |
+| Zenith (Canton) | Institutional lenders · Compliance | Solidity (via Zenith EVM) | Written, needs Zenith EVM deploy |
 | Base | EVM portability · DeFi oracle | Solidity | Code complete |
 | Solana | SVM portability · Score PDA | Anchor (Rust) | Written, Anchor v0.31 fix needed |
 | Cardano | Partner chain · Wallet history | Blockfrost API | Integrated for Layer 1 scoring |
@@ -46,14 +46,14 @@
 | Network | Status | Privacy Model | Contract |
 |---------|--------|---------------|----------|
 | **Midnight** | Written, needs compile | ZK proofs (Compact) | `kredz.compact` |
-| **Canton** | Written, needs DevNet | Sub-transaction privacy (DAML) | 4 DAML templates |
+| **Zenith (Canton)** | Written, needs Zenith EVM deploy | Sub-transaction privacy | Solidity (Zenith EVM) |
 | **Base** | Code complete (needs deploy) | Public EVM | Solidity + ERC-8004 |
 | **Solana** | Written, Anchor v0.31 fix needed | Public SVM | Anchor (Rust) |
 
 ### Why Five Networks?
 
 **Midnight** — ZK-native credit scoring. Borrowers prove creditworthiness without exposing raw data.
-**Canton** — Institutional credit distribution. Lenders query scores privately via sub-transaction privacy.
+**Zenith (Canton)** — Institutional credit distribution. Lenders query scores privately via Zenith EVM's sub-transaction privacy, using standard Solidity contracts and Ethereum RPC.
 **Base** — EVM composability. Any DeFi protocol can read a borrower's score on-chain via `IKredzOracle`.
 **Solana** — SVM composability. ScoreBadge PDA + Ed25519 verification for the Solana DeFi ecosystem.
 **Cardano** — Midnight's partner chain. Blockfrost-indexed wallet history enriches Layer 1 scoring signals natively.
@@ -69,7 +69,7 @@ One identity, five networks, zero repetition of the onboarding process.
 | Node.js 20+ | Frontend (React) + Backend (Express) |
 | 1AM Wallet | Midnight connection (dust-free) |
 | MetaMask | Base connection |
-| Docker 24+ | Canton LocalNet |
+| Docker 24+ | Zenith EVM LocalNet (Canton) |
 | Python 3.10+ | Scoring engine ML model |
 
 ### Frontend (React)
@@ -90,7 +90,7 @@ cp .env.example .env   # edit with your keys
 npm run dev            # http://localhost:3001
 ```
 
-### Canton LocalNet
+### Zenith EVM LocalNet (Canton)
 
 ```bash
 cd canton
@@ -135,25 +135,24 @@ The KREDZ Score (0–1000) fuses signals from privacy-preserving ZK proofs, on-c
 
 ---
 
-## Canton Integration (Hackathon Focus)
+## Zenith EVM Integration (Canton)
 
-### What We Built on Canton
+### What We Built on Zenith EVM
 
-**DAML Smart Contracts** (`canton/daml/`):
+**Solidity Contracts** (deployable to Zenith EVM on Canton):
 
 | Contract | Purpose | Privacy Feature |
 |----------|---------|----------------|
-| `KredzScore` | Score registry — institutional lenders query borrower scores | Only `operator` is signatory |
+| `KredzScore` | Score registry — institutional lenders query borrower scores via standard RPC | Only `operator` is signatory |
 | `KredzScoreResponse` | Response to a score query | Visible to `operator` + `lender` only |
 | `KredzAuditLog` | Immutable audit record of each query | Co-signed by both parties, no mutation |
 | `KredzLenderSubscription` | Subscribed borrower tracking with webhook delivery | `signatory kredz, lender` |
 
-**Key Canton Features Demonstrated:**
+**Key Zenith EVM Features Demonstrated:**
 
-- **Sub-transaction privacy:** A lender's `QueryScore` result is visible only to that lender and the kredz operator. No third party, including other lenders, can observe it.
-- **Multi-party workflows:** `QueryScore` → `KredzScoreResponse` → `AcknowledgeScore` → `KredzAuditLog` — a complete institutional credit assessment flow.
-- **Immutable audit trail:** `KredzAuditLog` is co-signed and never archived — regulatory-grade compliance evidence.
-- **Propose-accept pattern:** `KredzLenderSubscription` lets lenders manage their borrower watchlist with `AddBorrower`/`RemoveBorrower` choices.
+- **Sub-transaction privacy:** A lender's score query result is visible only to that lender and the kredz operator. No third party can observe it. Zenith EVM inherits Canton's privacy model.
+- **Atomic composability:** Zenith EVM transactions settle on Canton MainNet. State roots and finality are confirmed by Canton's validator set.
+- **Standard Ethereum RPC:** Lenders interact with Zenith EVM exactly like Ethereum — same tooling (Foundry, Hardhat, MetaMask), no DAML required.
 
 ### Demo Flow
 
@@ -161,8 +160,8 @@ The KREDZ Score (0–1000) fuses signals from privacy-preserving ZK proofs, on-c
 1. Borrower connects 1AM wallet on Midnight
 2. Selects privacy tier, builds KREDZ Score (layers 1-3)
 3. Score attested via ZK proof → proof hash stored on Midnight
-4. Backend syncs attestation to Canton → KredzScore contract created
-5. Institutional lender queries score on Canton → KredzScoreResponse (private)
+4. Backend syncs attestation to Zenith EVM on Canton → KredzScore contract created
+5. Institutional lender queries score on Zenith EVM → KredzScoreResponse (private)
 6. Lender acknowledges → KredzAuditLog created (immutable compliance record)
 ```
 
@@ -226,7 +225,7 @@ kredz/
 | Layer | Technology | Network |
 |-------|-----------|---------|
 | ZK Contracts | Compact | Midnight |
-| Privacy Contracts | DAML | Canton |
+| Privacy Contracts | Solidity (Zenith EVM) | Canton |
 | EVM Contracts | Solidity + Foundry | Base |
 | SVM Contracts | Anchor (Rust) | Solana |
 | Native Chain | Blockfrost API | Cardano |

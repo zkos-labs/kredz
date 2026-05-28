@@ -18,9 +18,9 @@ export function toast(message: string, type: ToastType = 'info') {
 
 const icons = { success: CheckCircle, error: AlertCircle, info: Info };
 const colors = {
-  success: 'border-green-500/30 bg-green-500/10 text-green-300',
-  error: 'border-red-500/30 bg-red-500/10 text-red-300',
-  info: 'border-accent/30 bg-accent/10 text-gold',
+  success: 'border-emerald-500/20 bg-[#101010] text-emerald-400',
+  error: 'border-red-500/20 bg-[#101010] text-red-400',
+  info: 'border-[#DEDBC8]/10 bg-[#101010] text-[#DEDBC8]',
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -48,11 +48,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 initial={{ opacity: 0, x: 60, scale: 0.9 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 60, scale: 0.9 }}
-                className={`glass flex items-center gap-3 px-4 py-3 rounded-xl border text-sm pointer-events-auto max-w-sm ${colors[t.type]}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm pointer-events-auto max-w-sm ${colors[t.type]}`}
               >
                 <Icon size={16} className="shrink-0" />
-                <span className="text-light/90">{t.message}</span>
-                <button onClick={() => setToasts(p => p.filter(x => x.id !== t.id))} className="ml-auto opacity-60 hover:opacity-100">
+                <span className="text-[#E1E0CC]">{t.message}</span>
+                <button onClick={() => setToasts(p => p.filter(x => x.id !== t.id))} className="ml-auto opacity-40 hover:opacity-80">
                   <X size={14} />
                 </button>
               </motion.div>
