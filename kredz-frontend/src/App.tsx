@@ -8,6 +8,7 @@ import Landing from './pages/Landing';
 import LinkWallets from './pages/LinkWallets';
 import TierSelection from './pages/TierSelection';
 import Dashboard from './pages/Dashboard';
+import Privacy from './pages/Privacy';
 
 const pageVariants: Variants = {
   initial: { opacity: 0, y: 16 },
@@ -58,6 +59,7 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
 
+        <Route path="/privacy" element={<Page><Privacy /></Page>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>

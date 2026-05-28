@@ -357,9 +357,17 @@ export default function Landing() {
             Midnight, Canton, Base, Solana, Cardano &middot; Privacy-preserving credit scoring &middot; &copy; 2026 KREDZ
           </p>
           <div className="flex gap-6">
-            {['Docs', 'GitHub', 'Discord'].map(l => (
-              <a key={l} href="#" className="text-xs text-[#DEDBC8]/35 hover:text-[#DEDBC8]/70 transition-colors">{l}</a>
-            ))}
+            {[
+              { label: 'Docs', href: '#' },
+              { label: 'GitHub', href: 'https://github.com/kredz-labs/kredz' },
+              { label: 'Discord', href: '#' },
+              { label: 'Privacy', href: '/privacy' },
+            ].map(({ label, href }) => {
+              const isExternal = href.startsWith('http');
+              return isExternal
+                ? <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="text-xs text-[#DEDBC8]/35 hover:text-[#DEDBC8]/70 transition-colors">{label}</a>
+                : <a key={label} href={href} className="text-xs text-[#DEDBC8]/35 hover:text-[#DEDBC8]/70 transition-colors">{label}</a>;
+            })}
           </div>
         </div>
       </footer>
