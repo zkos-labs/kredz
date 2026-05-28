@@ -637,11 +637,14 @@ Canton participant node, DAML deployment, first institutional lender, score sync
 |------|-----------|
 | KREDZ Score | Composite credit score (0-1000) |
 | Compact | Midnight's ZK smart contract language |
-| DAML | Digital Asset Modeling Language for Canton |
+| DAML | Digital Asset Modeling Language (deprecated for kredz) |
+| Zenith EVM | EVM-compatible execution environment on Canton (Reth/Solidity) |
 | ERC-8004 | Trustless Agents standard for EVM portability |
 | SBT | Soulbound Token (non-transferable NFT) |
 | Selective Disclosure | Proving specific attributes without full data exposure |
 | ZK-ML | Zero-knowledge machine learning inference |
+| MAIS | Midnight Agent Identity Standard (MIP draft) |
+| Midnight Passport | Seven-layer identity infrastructure for Midnight |
 
 ### 24.2 Current Tech Stack
 
@@ -649,27 +652,49 @@ Canton participant node, DAML deployment, first institutional lender, score sync
 |-------|-----------|--------|
 | Frontend | React 18 + Vite + TypeScript + Tailwind v4 | Built |
 | Animations | Framer Motion | Built |
-| Midnight wallet | Lace Beta | Built |
-| Midnight SDK | providers.ts | Built (mock) |
-| ZK contract | kredz.compact | Written, needs compile |
+| Midnight wallet | 1AM (dust-free, ProofStation) | Built |
+| Midnight SDK | providers.ts | Built |
+| ZK contract | kredz.compact | **Compiled** (compact 0.5.1, 6 circuits, 796 KB keys) |
 | EVM wallet | MetaMask | Built |
-| Base contracts | Solidity (3 files) | Built |
-| Deploy script | Hardhat | Built |
-| Attestation relayer | Node.js | Built |
-| Canton contracts | DAML | See `canton/daml/` |
+| Base contracts | Solidity + Foundry (3 files, 4/4 tests) | Built |
+| Solana program | Anchor (written, compiled .so) | Built |
+| Zenith EVM contracts | Solidity (deployable to Zenith EVM on Canton) | Written |
+| Attestation relayer | Node.js | Built (deprecated, migrating to EffectStream) |
 | Scoring engine | Node.js + Python ML | See `backend/` |
 | KYC integration | SumSub | Partial (stub) |
+| Multichain sync | EffectStream | See `effectstream/` |
 
 ### 24.3 References
 
 - Midnight Network docs: docs.midnight.network
-- Canton Network: canton.network
-- Digital Asset DAML: docs.daml.com
+- 1AM Wallet: 1am.xyz/developers
+- Zenith EVM: docs.zenith.network/zenith-evm
+- EffectStream: effectstream.github.io/docs
 - ERC-8004: eips.ethereum.org/EIPS/eip-8004
 - SumSub API: docs.sumsub.com
 - Chainalysis KYT: docs.chainalysis.com/api/kyt
 - MiCA Regulation: eur-lex.europa.eu (32023R1114)
 - GENIUS Act: congress.gov (2025)
+- MAIS MIP Draft: github.com/midnightntwrk/midnight-improvement-proposals/pull/110
+- Midnight Passport: midnight-passport.vercel.app
+
+### 24.4 Future Integrations
+
+#### Midnight Agent Identity Standard (MAIS)
+
+MAIS is a proposed MIP defining four Compact contracts for AI agent identity on Midnight: Identity Registry (dual-mode public/private), Reputation Registry (public scores with private evidence), Validation Registry (tiered staked validators), and Disclosure Tier Registry (mapping agent data to Midnight's three disclosure tiers). An optional ERC-8004 bridge enables cross-chain agent identity with Ethereum.
+
+**Relevance to kredz:** kredz borrowers can be registered as MAIS agents, making KREDZ Scores composable with the broader Midnight agent ecosystem. The Reputation Registry's score model (0-100 with public scores and private evidence) aligns with kredz's three-layer scoring approach. The Validation Registry's tiered validator system (10K/50K/100K NIGHT stake tiers) provides a trust framework that kredz's institutional lender verification could leverage. The Disclosure Tier Registry maps directly to kredz's privacy tiers (Anonymous / Pseudonymous / Full Compliance).
+
+**Status:** Draft MIP awaiting editor review. DevRel team has escalated to engineering for deep review. Integration targeted for Phase 2+.
+
+#### Midnight Passport
+
+Midnight Passport is a seven-layer identity infrastructure currently in closed-source development by LFDT-Nightstream. The layers span from TEE hardware key protection (Layer 1) through wallet compartments (Layer 2), account model (Layer 3), ZK credentials via zkMe zkKYC (Layer 4), human-readable naming (Layer 5), chain abstraction (Layer 6), to a DApp operating system (Layer 7). It supports seedless recovery, multi-chain account abstraction, and zero-knowledge encrypted cloud backup.
+
+**Relevance to kredz:** Layer 4 (Identity & Credentials) could serve as a credential provider for kredz's Tier 1 and Tier 2 verification, potentially replacing direct SumSub integration with Midnight-native zkKYC flows. Layer 5 (naming) would enable human-readable borrower identities (`alice.midnight`) instead of raw wallet addresses. Layer 6 (chain abstraction) aligns with kredz's multi-network portability goal.
+
+**Status:** Closed-source, no public API or SDK. Integration deferred until public release.
 
 ---
 
