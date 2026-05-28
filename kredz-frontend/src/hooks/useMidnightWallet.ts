@@ -45,7 +45,8 @@ export function useMidnightWallet() {
       const initialAPI = await detectWallet();
       if (!initialAPI) throw new Error('ONEM_NOT_FOUND');
 
-      const connectedAPI = await initialAPI.connect('preview');
+      const network = import.meta.env.VITE_MIDNIGHT_NETWORK ?? 'preprod';
+      const connectedAPI = await initialAPI.connect(network);
 
       const { shieldedAddress, shieldedCoinPublicKey, shieldedEncryptionPublicKey }
         = await connectedAPI.getShieldedAddresses() as ShieldedAddresses & {
