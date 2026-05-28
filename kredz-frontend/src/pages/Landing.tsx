@@ -278,7 +278,7 @@ export default function Landing() {
         {/* ── TOOLS ── */}
         <div className="max-w-4xl mx-auto mb-20 relative z-10">
           <div className="text-center mb-10">
-            <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Powered By</p>
+            <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Infrastructure</p>
             <h2 className="text-2xl sm:text-3xl font-medium text-[#E1E0CC]">Powered By</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
