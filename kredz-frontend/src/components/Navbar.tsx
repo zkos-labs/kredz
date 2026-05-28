@@ -28,7 +28,7 @@ export function Navbar() {
       navigate('/app');
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      toast(msg === 'LACE_NOT_FOUND' ? 'Please install Lace Beta Wallet for Midnight Network' : 'Connection failed', 'error');
+      toast(msg === 'ONEM_NOT_FOUND' ? 'Please install the 1AM wallet for Midnight Network' : 'Connection failed', 'error');
     }
   }
 

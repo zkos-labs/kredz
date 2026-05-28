@@ -57,8 +57,8 @@ export default function Landing() {
       navigate('/app');
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      toast(msg === 'LACE_NOT_FOUND'
-        ? 'Please install Lace Beta Wallet for Midnight Network'
+      toast(msg === 'ONEM_NOT_FOUND'
+        ? 'Please install the 1AM wallet for Midnight Network'
         : 'Connection failed. Please try again.', 'error');
     }
   }
@@ -274,6 +274,33 @@ export default function Landing() {
 
       {/* ═══ CTA ═══ */}
       <section className="relative px-4 md:px-12 py-16 md:py-28 bg-noise">
+
+        {/* ── TOOLS ── */}
+        <div className="max-w-4xl mx-auto mb-20 relative z-10">
+          <div className="text-center mb-10">
+            <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Powered By</p>
+            <h2 className="text-2xl sm:text-3xl font-medium text-[#E1E0CC]">Powered By</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <div className="bg-[#101010] rounded-3xl p-5 md:p-6 flex flex-col gap-3 hover:bg-[#151515] transition-colors">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="font-medium text-sm text-[#E1E0CC]">1AM Wallet</span>
+              </div>
+              <p className="text-xs text-[#DEDBC8]/60 leading-relaxed">Dust-free Midnight wallet. Zero NIGHT for gas — ProofStation sponsors all ZK proving and transaction fees server-side.</p>
+              <a href="https://1am.xyz" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">1am.xyz</a>
+            </div>
+            <div className="bg-[#101010] rounded-3xl p-5 md:p-6 flex flex-col gap-3 hover:bg-[#151515] transition-colors">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-cyan-400" />
+                <span className="font-medium text-sm text-[#E1E0CC]">EffectStream</span>
+              </div>
+              <p className="text-xs text-[#DEDBC8]/60 leading-relaxed">Multichain sync engine by Midnight Foundation. Reads events from all 5 networks into a unified state machine. Replaces manual indexer polling.</p>
+              <a href="https://github.com/effectstream/effectstream" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">github.com/effectstream</a>
+            </div>
+          </div>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center relative z-10"

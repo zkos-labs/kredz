@@ -1,3 +1,5 @@
+// Uses 1AM wallet (dust-free proving via ProofStation).
+// Providers are built from connectedAPI per 1AM docs at https://1am.xyz/developers
 import { buildProviders } from './providers';
 import type { ConnectedWallet } from '../hooks/useMidnightWallet';
 import type { KredzContractAPI } from '../contracts/kredz';

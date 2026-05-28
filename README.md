@@ -234,6 +234,8 @@ kredz/
 | Backend | Node.js + Express + TypeScript | — |
 | ML Model | Python + XGBoost | — |
 | Orchestration | Docker Compose | — |
+| Wallet | 1AM (dust-free) | Midnight |
+| Multichain Sync | EffectStream | All 5 networks |
 
 ---
 

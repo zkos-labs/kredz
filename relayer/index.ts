@@ -1,3 +1,7 @@
+// DEPRECATED: replaced by EffectStream sync service.
+// Remove after state-machine.ts output is validated against this output
+// for one full session. Deleting it before EffectStream is producing verified
+// matching output is a silent failure risk.
 import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
 dotenv.config();

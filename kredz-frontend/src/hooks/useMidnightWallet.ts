@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { MidnightWalletAPI } from '../midnight/types';
+import type { InitialAPI, ConnectedAPI, ShieldedAddresses } from '../midnight/types';
 
 export interface WalletState {
   address: string;
@@ -16,7 +16,21 @@ export interface ServiceUris {
 export interface ConnectedWallet {
   state: WalletState;
   uris: ServiceUris;
-  walletAPI: MidnightWalletAPI;
+  connectedAPI: ConnectedAPI;
+}
+
+function detectWallet(): Promise<InitialAPI | null> {
+  return new Promise((resolve) => {
+    const wallet = window.midnight?.['1am'];
+    if (wallet) { resolve(wallet); return; }
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      const w = window.midnight?.['1am'];
+      if (w) { clearInterval(interval); resolve(w); }
+      else if (++attempts > 50) { clearInterval(interval); resolve(null); }
+    }, 100);
+  });
 }
 
 export function useMidnightWallet() {
@@ -28,12 +42,31 @@ export function useMidnightWallet() {
     setIsConnecting(true);
     setError(null);
     try {
-      const lace = window.midnight?.mnLace;
-      if (!lace) throw new Error('LACE_NOT_FOUND');
-      const walletAPI = await lace.enable();
-      const state = await walletAPI.state();
-      const uris = await lace.serviceUriConfig();
-      setWallet({ state, uris, walletAPI });
+      const initialAPI = await detectWallet();
+      if (!initialAPI) throw new Error('ONEM_NOT_FOUND');
+
+      const connectedAPI = await initialAPI.connect('preview');
+
+      const { shieldedAddress, shieldedCoinPublicKey, shieldedEncryptionPublicKey }
+        = await connectedAPI.getShieldedAddresses() as ShieldedAddresses & {
+          shieldedCoinPublicKey: string; shieldedEncryptionPublicKey: string;
+        };
+
+      const config = await connectedAPI.getConfiguration();
+
+      setWallet({
+        state: {
+          address: shieldedAddress,
+          coinPublicKey: shieldedCoinPublicKey,
+          encryptionPublicKey: shieldedEncryptionPublicKey,
+        },
+        uris: {
+          indexerUri: config.indexerUri,
+          indexerWsUri: config.indexerWsUri,
+          proverServerUri: config.proverServerUri,
+        },
+        connectedAPI,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Connection failed';
       setError(msg);
@@ -44,12 +77,8 @@ export function useMidnightWallet() {
   }, []);
 
   const disconnect = useCallback(async () => {
-    try {
-      await window.midnight?.mnLace?.disconnect();
-    } finally {
-      setWallet(null);
-      setError(null);
-    }
+    setWallet(null);
+    setError(null);
   }, []);
 
   return { wallet, isConnecting, error, connect, disconnect };

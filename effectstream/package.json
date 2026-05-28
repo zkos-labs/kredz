@@ -1,0 +1,17 @@
+{
+  "name": "kredz-effectstream",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run effectstream-node",
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@effectstream/sm": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
