@@ -4,7 +4,7 @@
 
 **Version:** 0.2
 **Status:** Active Draft
-**Owner:** DeDanzi / Tawf Labs
+**Owner:** DeDanzi / Kredz Labs
 **Last Updated:** May 2026
 **Classification:** Confidential
 
@@ -698,4 +698,4 @@ Midnight Passport is a seven-layer identity infrastructure currently in closed-s
 
 ---
 
-*kredz.xyz PRD v0.2 — DeDanzi / Tawf Labs — Confidential*
+*kredz.xyz PRD v0.2 — DeDanzi / Kredz Labs — Confidential*
