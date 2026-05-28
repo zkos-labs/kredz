@@ -1,52 +1,63 @@
-pragma language_version >= 0.22;
+pragma language_version 0.22;
+
+import CompactStandardLibrary;
 
 // KREDZ ZK Smart Contract
 // Stores tier attestation, score hash, and multichain identity on Midnight Network.
 // Private inputs never leave the user's device — only ZK proofs are submitted on-chain.
 
-// Public on-chain state
 export ledger tier: Uint<8>;
 export ledger scoreHash: Bytes<32>;
 export ledger attestationTimestamp: Uint<64>;
-// Multichain: linked EVM address (20 bytes = Base/Ethereum address)
 export ledger evmAddress: Bytes<20>;
-// Multichain: linked Solana address (32 bytes = Solana public key)
 export ledger solanaAddress: Bytes<32>;
-// Attestation blob: score (2 bytes) + evmAddress (20 bytes) + timestamp (8 bytes) = 30 bytes
-// Signed by the relayer key off-chain; stored here for relayer to pick up
 export ledger scoreAttestation: Bytes<32>;
+
+// Witnesses for private data — implemented by the TypeScript DApp.
+// Each user supplies their own implementation. The contract only sees the ZK proof.
+witness tier0Witness(): [];
+witness tier1Witness(): Bytes<32>;
+witness tier2Witness(): Bytes<32>;
+witness evmAddressWitness(): Bytes<20>;
+witness solanaAddressWitness(): Bytes<32>;
+witness scoreDataWitness(): Bytes<32>;
+witness timestampWitness(): Uint<64>;
 
 // Tier 0: Anonymous — on-chain signals only, no private input needed
 export circuit setTier0(): [] {
+  tier0Witness();
   tier = disclose(0 as Uint<8>);
 }
 
-// Tier 1: Pseudonymous — ZK-prove one real-world attribute (income, age, etc.)
-export circuit setTier1(attribute: Opaque<"string">): [] {
+// Tier 1: Pseudonymous — ZK-prove one real-world attribute
+export circuit setTier1(): [] {
+  tier1Witness();
   tier = disclose(1 as Uint<8>);
 }
 
 // Tier 2: Full Compliance — ZK-prove full KYC bundle
-export circuit setTier2(fullKyc: Opaque<"string">): [] {
+export circuit setTier2(): [] {
+  tier2Witness();
   tier = disclose(2 as Uint<8>);
 }
 
-// Link an EVM wallet address to this Midnight identity.
-export circuit linkEvmAddress(addr: Opaque<"string">): [] {
-  evmAddress = disclose(pad(20, addr));
+// Link an EVM wallet address to this Midnight identity
+export circuit linkEvmAddress(): [] {
+  const addr = evmAddressWitness();
+  evmAddress = disclose(addr);
 }
 
-// Link a Solana wallet address (base58 public key, 32 bytes) to this Midnight identity.
-export circuit linkSolanaAddress(addr: Opaque<"string">): [] {
-  solanaAddress = disclose(pad(32, addr));
+// Link a Solana wallet address to this Midnight identity
+export circuit linkSolanaAddress(): [] {
+  const addr = solanaAddressWitness();
+  solanaAddress = disclose(addr);
 }
 
-// Update score hash — called by the scoring engine after computing the KREDZ Score.
-// Also writes a 32-byte attestation blob (score + evmAddress + timestamp) that the
-// off-chain relayer reads and forwards to the Base verifier contract.
-export circuit updateScore(scoreData: Opaque<"string">): [] {
-  scoreHash = disclose(pad(32, scoreData));
-  attestationTimestamp = disclose(current_time() as Uint<64>);
-  // Attestation = pad(scoreData + evmAddress) — relayer signs this off-chain
-  scoreAttestation = disclose(pad(32, scoreData));
+// Update score hash and attestation blob — called by the scoring engine
+export circuit updateScore(): [] {
+  const data = scoreDataWitness();
+  const ts = timestampWitness();
+  scoreHash = disclose(data);
+  attestationTimestamp = disclose(ts);
+  scoreAttestation = disclose(data);
 }

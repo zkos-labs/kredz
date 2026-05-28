@@ -14,7 +14,7 @@ export async function buildProviders(connected: ConnectedWallet) {
   ]);
 
   const zkConfigProvider = new FetchZkConfigProvider(
-    'https://your-cdn.com/contract/compiled/kredz',  // TODO: replace with deployed ZK keys CDN
+    '/contracts/managed/kredz',  // ZK keys served from local dev server or CDN
     fetch.bind(window),
   );
 
