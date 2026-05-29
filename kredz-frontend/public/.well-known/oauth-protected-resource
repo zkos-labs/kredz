@@ -1,0 +1,6 @@
+{
+  "resource": "https://kredz.xyz",
+  "authorization_servers": ["https://kredz.xyz"],
+  "scopes_supported": ["score:read", "tier:read", "attestation:write"],
+  "bearer_methods_supported": ["header"]
+}
