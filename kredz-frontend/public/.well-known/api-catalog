@@ -1,0 +1,10 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://kredz.xyz/api/v1",
+      "service-desc": "https://kredz.xyz/openapi.yaml",
+      "service-doc": "https://github.com/kredz-labs/kredz/tree/main/kredz-midnight/README.md",
+      "status": "https://kredz.xyz/api/health"
+    }
+  ]
+}

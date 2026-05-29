@@ -1,0 +1,14 @@
+{
+  "serverInfo": {
+    "name": "kredz-score-profile",
+    "version": "0.1.0",
+    "description": "Privacy-preserving credit identity protocol on Midnight Network using ZK witnesses, score commitment hashing, and selective disclosure"
+  },
+  "transport": {
+    "type": "sse",
+    "url": "https://kredz.xyz/api/mcp"
+  },
+  "capabilities": {
+    "tools": {}
+  }
+}

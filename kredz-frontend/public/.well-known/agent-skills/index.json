@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agentskills.io/schemas/agent-skills-discovery-v0.2.0.json",
+  "skills": [
+    {
+      "name": "kredz-score-attest",
+      "type": "midnight-compact",
+      "description": "Attest a privacy-preserving credit score on Midnight Network using ZK witnesses. Scores are never stored in plaintext on-chain.",
+      "url": "https://github.com/kredz-labs/kredz/tree/main/kredz-midnight",
+      "sha256": "__placeholder__"
+    },
+    {
+      "name": "kredz-prove-tier",
+      "type": "midnight-compact",
+      "description": "Prove a credit tier (Anonymous/Pseudonymous/Full Compliance) via selective disclosure without revealing the exact score.",
+      "url": "https://github.com/kredz-labs/kredz/tree/main/kredz-midnight",
+      "sha256": "__placeholder__"
+    }
+  ]
+}
