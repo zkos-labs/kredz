@@ -39,7 +39,7 @@ export function useEvmWallet() {
             params: [{ chainId: '0x14a34' }], // Base Sepolia
           });
         } catch {
-          // User rejected switch — continue anyway, just warn
+          // User rejected switch. Continue anyway, just warn
           console.warn('[KREDZ] Not on Base chain, continuing anyway');
         }
       }

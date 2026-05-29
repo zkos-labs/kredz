@@ -27,7 +27,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Page><Landing /></Page>} />
 
-        {/* /app — redirect to the right step */}
+        {/* /app: redirect to the right step */}
         <Route path="/app" element={
           <ProtectedRoute>
             <Navigate to={

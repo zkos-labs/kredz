@@ -25,17 +25,17 @@ const SECTIONS = [
   {
     icon: Eye,
     title: 'Third-party providers',
-    content: 'For Tier 1 (Pseudonymous) and Tier 2 (Full Compliance) users, Kredz integrates with KYC providers including SumSub and Chainalysis KYT to verify identity attributes and screen wallet activity. These providers operate under their own privacy policies and data processing agreements with Kredz Labs. Kredz receives only the ZK credential attesting to verification status — not the underlying identity documents, biometric data, or raw screening results. For Tier 0 (Anonymous) users, no third-party identity providers are involved at any stage.',
+    content: 'For Tier 1 (Pseudonymous) and Tier 2 (Full Compliance) users, Kredz integrates with KYC providers including SumSub and Chainalysis KYT to verify identity attributes and screen wallet activity. These providers operate under their own privacy policies and data processing agreements with Kredz Labs. Kredz receives only the ZK credential attesting to verification status, not the underlying identity documents, biometric data, or raw screening results. For Tier 0 (Anonymous) users, no third-party identity providers are involved at any stage.',
   },
   {
     icon: Fingerprint,
     title: 'Data retention and deletion',
-    content: 'On-chain data (score hashes, tier classifications, linked wallet addresses) persist on the Midnight ledger for as long as the contract is active. ZK commitments are pseudonymous by design and cannot be linked to your real identity without your private key. You may request credential revocation at any time via your Midnight wallet, which removes your Tier 1 or Tier 2 status. KYC data held by third-party providers is subject to their respective retention policies — you may submit deletion requests directly to those providers.',
+    content: 'On-chain data (score hashes, tier classifications, linked wallet addresses) persist on the Midnight ledger for as long as the contract is active. ZK commitments are pseudonymous by design and cannot be linked to your real identity without your private key. You may request credential revocation at any time via your Midnight wallet, which removes your Tier 1 or Tier 2 status. KYC data held by third-party providers is subject to their respective retention policies. You may submit deletion requests directly to those providers.',
   },
   {
     icon: Globe,
     title: 'Your rights and control',
-    content: 'You remain in control of your Kredz identity at all times. You can revoke ZK credentials through your Midnight wallet. You can disconnect linked EVM and Solana addresses. You can choose not to use any third-party KYC services by remaining at Tier 0 (Anonymous). Kredz uses the 1AM wallet for Midnight connectivity — all transaction fees are sponsored by ProofStation via dust-free proving. Your private key is held solely by you in your 1AM browser extension. Kredz cannot access, move, or control your wallet or funds.',
+    content: 'You remain in control of your Kredz identity at all times. You can revoke ZK credentials through your Midnight wallet. You can disconnect linked EVM and Solana addresses. You can choose not to use any third-party KYC services by remaining at Tier 0 (Anonymous). Kredz uses the 1AM wallet for Midnight connectivity. All transaction fees are sponsored by ProofStation via dust-free proving. Your private key is held solely by you in your 1AM browser extension. Kredz cannot access, move, or control your wallet or funds.',
   },
   {
     icon: Cookie,

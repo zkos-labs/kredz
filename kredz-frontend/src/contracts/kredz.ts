@@ -1,14 +1,14 @@
 /**
- * kredz.compact — KREDZ ZK Smart Contract (Multichain Edition)
+ * kredz.compact - KREDZ ZK Smart Contract (Multichain Edition)
  *
  * Compile with: compact compile contracts/kredz.compact contracts/managed/kredz
  *
  * Ledger state:
- *   tier                — privacy tier (0/1/2)
- *   scoreHash           — hash of the KREDZ score data
- *   attestationTimestamp — last score update time
- *   evmAddress          — linked Base/EVM wallet address (20 bytes)
- *   scoreAttestation    — 32-byte blob for the off-chain relayer to bridge to Base
+ *   tier                - privacy tier (0/1/2)
+ *   scoreHash           - hash of the KREDZ score data
+ *   attestationTimestamp - last score update time
+ *   evmAddress          - linked Base/EVM wallet address (20 bytes)
+ *   scoreAttestation    - 32-byte blob for the off-chain relayer to bridge to Base
  */
 
 export interface KredzLedgerState {

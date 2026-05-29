@@ -86,7 +86,7 @@ export function useSolanaScore() {
       const ed25519Ix = Ed25519Program.createInstructionWithPublicKey({
         publicKey: userPubkey.toBytes(),
         message: msg,
-        signature: Buffer.alloc(64), // placeholder — real signature from relayer
+        signature: Buffer.alloc(64), // placeholder
       });
 
       const [badgePda] = PublicKey.findProgramAddressSync(

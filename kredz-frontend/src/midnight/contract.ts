@@ -1,5 +1,5 @@
 // Compiled Midnight contract using 1AM wallet (dust-free proving via ProofStation).
-// The kredz.compact contract is now compiled — real ZK circuits exist at:
+// The kredz.compact contract is now compiled. Real ZK circuits exist at:
 //   contracts/managed/kredz/keys/*.prover (6 circuits)
 //
 // ZK keys must be hosted on a CDN with CORS for FetchZkConfigProvider.
@@ -10,7 +10,7 @@ import type { KredzContractAPI } from '../contracts/kredz';
 export async function deployKredzContract(wallet: ConnectedWallet): Promise<KredzContractAPI> {
   // buildProviders() is skipped in production because @midnight-ntwrk/* packages
   // are marked as external in vite.config.ts (WASM/Node.js modules don't bundle).
-  // The real deploy would use them — but the mock contract API doesn't need providers.
+  // The real deploy would use them, but the mock contract API doesn't need providers.
   //
   // When ready for real deploy on Midnight:
   //   const providers = await buildProviders(wallet);

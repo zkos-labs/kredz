@@ -287,7 +287,7 @@ export default function Landing() {
                 <div className="w-2 h-2 rounded-full bg-amber-400" />
                 <span className="font-medium text-sm text-[#E1E0CC]">1AM Wallet</span>
               </div>
-              <p className="text-xs text-[#DEDBC8]/60 leading-relaxed">Dust-free Midnight wallet. Zero NIGHT for gas — ProofStation sponsors all ZK proving and transaction fees server-side.</p>
+              <p className="text-xs text-[#DEDBC8]/60 leading-relaxed">Dust-free Midnight wallet. Zero NIGHT for gas. ProofStation sponsors all ZK proving and transaction fees server-side.</p>
               <a href="https://1am.xyz" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">1am.xyz</a>
               <a href="https://1am.xyz/developers" target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#DEDBC8]/30 hover:text-[#DEDBC8]/60 transition-colors">Developer docs</a>
             </div>
