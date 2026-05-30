@@ -3,14 +3,6 @@ pragma language_version >= 0.22;
 import CompactStandardLibrary;
 
 // ────── KREDZ Score Profile — Privacy-Preserving Credit Identity ──────────
-//
-// Privacy features:
-//   witness attestorSecret()            → ZK witness-based authorization
-//   persistentHash with salt            → score hash hides exact value
-//   selective disclosure                → prove_tier reveals tier only
-//   domain-separated key derivation     → "kredz:attestor:v1"
-
-// ── Structs ────────────────────────────────────────────────────────────────
 
 struct ScoreData {
   score: Uint<16>,
@@ -29,11 +21,11 @@ export ledger evm_linked: Map<Bytes<32>, Bytes<20>>;
 export ledger solana_linked: Map<Bytes<32>, Bytes<32>>;
 export ledger attestor_nonce: Counter;
 
-// ── Witnesses (private state — never touches the chain) ───────────────────
+// ── Witnesses (private — body in TypeScript, never touches chain) ─────────
 
 witness attestorSecret(): Bytes<32>;
 
-// ── Pure helpers (no ledger access) ───────────────────────────────────────
+// ── Pure helpers ──────────────────────────────────────────────────────────
 
 pure circuit attestorPublicKey(secret: Bytes<32>, nonce: Uint<64>): Bytes<32> {
   return persistentHash<Vector<3, Bytes<32>>>([
@@ -49,33 +41,28 @@ pure circuit makeScoreHash(data: ScoreData): Bytes<32> {
 
 // ── Constructor ──────────────────────────────────────────────────────────
 
-constructor(owner_key: Bytes<32>) {
-  initialized = true;
-  attestor_key = disclose(owner_key);
-  total_users = 0;
+constructor() {
+  const secret = attestorSecret();
+  attestor_key = disclose(attestorPublicKey(secret, 0 as Uint<64>));
   attestor_nonce.increment(1);
+  initialized = true;
+  total_users = 0;
 }
 
 // ── Circuits ──────────────────────────────────────────────────────────────
 
-// Attest a score for a user. Only the attestor (witness secret holder)
-// can call this. Score + salt are private witnesses — only the hash
-// and tier go on-chain.
 export circuit attest_score(
   user_pubkey: Bytes<32>,
-  score: Uint<16>,             // PRIVATE WITNESS — never disclosed
-  salt: Bytes<16>,             // PRIVATE WITNESS — commitment salt
-  tier: Uint<8>                // DISCLOSED — public classification
+  score: Uint<16>,
+  salt: Bytes<16>,
+  tier: Uint<8>
 ): [] {
   assert(initialized, "Contract not initialized");
 
-  // Verify attestor authorization via ZK witness
   const secret = attestorSecret();
   const derived = attestorPublicKey(secret, attestor_nonce);
   assert(derived == attestor_key, "Unauthorized attestor");
 
-  // Derive score hash from private score + salt
-  // The score itself is NEVER disclosed to the ledger
   const sd = ScoreData { score: score, salt: salt };
   const score_hash = makeScoreHash(sd);
 
@@ -92,7 +79,6 @@ export circuit attest_score(
   attestor_key = disclose(attestorPublicKey(secret, attestor_nonce));
 }
 
-// Prove a user's tier. Returns the tier without revealing the exact score.
 export circuit prove_tier(user_pubkey: Bytes<32>): Uint<8> {
   assert(initialized, "Contract not initialized");
   const public_user = disclose(user_pubkey);
@@ -100,14 +86,10 @@ export circuit prove_tier(user_pubkey: Bytes<32>): Uint<8> {
   return tiers.lookup(public_user);
 }
 
-// Prove a user's score matches the stored hash.
-// User provides score + salt as witnesses — verifier checks against
-// the hash on-chain. Returns true if the hash matches.
-// This is a zero-knowledge commitment opening proof.
 export circuit prove_score_hash(
   user_pubkey: Bytes<32>,
-  score: Uint<16>,             // PRIVATE WITNESS
-  salt: Bytes<16>              // PRIVATE WITNESS
+  score: Uint<16>,
+  salt: Bytes<16>
 ): Boolean {
   assert(initialized, "Contract not initialized");
   const public_user = disclose(user_pubkey);
@@ -118,7 +100,6 @@ export circuit prove_score_hash(
   return score_hashes.lookup(public_user) == actual_hash;
 }
 
-// Link an EVM wallet address (attestor-authorized)
 export circuit link_evm(
   user_pubkey: Bytes<32>,
   evm_address: Bytes<20>
@@ -133,7 +114,6 @@ export circuit link_evm(
   attestor_key = disclose(attestorPublicKey(secret, attestor_nonce));
 }
 
-// Link a Solana wallet address (attestor-authorized)
 export circuit link_solana(
   user_pubkey: Bytes<32>,
   solana_address: Bytes<32>

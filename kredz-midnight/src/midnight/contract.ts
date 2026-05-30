@@ -2,6 +2,7 @@ import { CompiledContract } from '@midnight-ntwrk/compact-js';
 import { createUnprovenDeployTx, submitTxAsync, createUnprovenCallTx } from '@midnight-ntwrk/midnight-js-contracts';
 import { sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
 import type { ConnectedSession } from './session';
+import { makeWitnesses, persistSecret } from './witnesses';
 
 let cachedContract: any = null;
 let cachedLedger: any = null;
@@ -13,24 +14,21 @@ async function loadContract() {
   cachedLedger = mod.ledger;
 }
 
-function getCompiledContract() {
+function getCompiledContract(): any {
   if (!cachedContract) throw new Error('Contract not loaded');
-  return CompiledContract.make('kredz_score_profile', cachedContract).pipe(
-    CompiledContract.withVacantWitnesses,
-    CompiledContract.withCompiledFileAssets('/contract/kredz-score-profile'),
-  ) as any;
+  return (CompiledContract.make as any)('kredz_score_profile', cachedContract).pipe(
+    (CompiledContract as any).withWitnesses(makeWitnesses()),
+    (CompiledContract as any).withCompiledFileAssets('/contract/kredz-score-profile'),
+  );
 }
 
-export async function deployContract(
-  session: ConnectedSession,
-  ownerPublicKey: Uint8Array,
-): Promise<string> {
+export async function deployContract(session: ConnectedSession): Promise<string> {
   await loadContract();
   const compiledContract = getCompiledContract();
 
   const deployTxData = await createUnprovenDeployTx(
     { zkConfigProvider: session.providers.zkConfigProvider, walletProvider: session.providers.walletProvider },
-    { compiledContract, args: [ownerPublicKey], signingKey: sampleSigningKey() },
+    { compiledContract, args: [], signingKey: sampleSigningKey() },
   );
 
   const contractAddress = deployTxData.public.contractAddress;
@@ -39,6 +37,7 @@ export async function deployContract(
 
   await session.providers.privateStateProvider.setContractAddress(contractAddress);
   await session.providers.privateStateProvider.setSigningKey(contractAddress, deployTxData.private.signingKey);
+  await persistSecret(session, contractAddress);
 
   return contractAddress;
 }
@@ -77,7 +76,7 @@ export async function waitForContractIndexed(
     if (state?.data) return;
     await new Promise((r) => setTimeout(r, 2000));
   }
-  throw new Error('Contract not indexed');
+  throw new Error('Contract not indexed after polling');
 }
 
 export async function readContractState(session: ConnectedSession, contractAddress: string): Promise<any> {

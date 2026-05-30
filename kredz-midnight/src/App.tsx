@@ -21,15 +21,7 @@ function AppContent() {
     setIsDeploying(true);
     setDeployError(null);
     try {
-      // Derive owner public key from wallet
-      const ownerKey = new Uint8Array(32);
-      const pk = session.shieldedCoinPublicKey;
-      const pkHex = typeof pk === 'string' ? pk : '';
-      for (let i = 0; i < 32 && i * 2 < pkHex.length; i++) {
-        ownerKey[i] = parseInt(pkHex.slice(i * 2, i * 2 + 2), 16);
-      }
-
-      const addr = await deployContract(session, ownerKey);
+      const addr = await deployContract(session);
       await waitForContractIndexed(session, addr);
       setContractAddress(addr);
       setActiveTab('attest');

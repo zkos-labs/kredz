@@ -46,8 +46,13 @@ User Wallet (1AM)
 ## Prerequisites
 
 - **Node.js 22+** (`node --version`)
-- **Midnight Compact compiler** (`compact --version` should output `compact 0.5.1` or newer)
+- **Midnight Compact compiler `0.5.1`** (`compact --version` must output exactly `compact 0.5.1`)
   - Install: follow [Midnight Getting Started](https://docs.midnight.network/getting-started)
+  - Check the [Midnight support matrix](https://docs.midnight.network/relnotes/support-matrix) to verify compiler/runtime compatibility
+- **1AM Wallet browser extension** beta channel
+  - [Install from 1AM](https://1am.xyz/install-beta)
+  - Create or import a wallet on Midnight Preprod
+  - Fund it with NIGHT tokens from the [Preprod Faucet](https://faucet.preprod.midnight.network)
 - **1AM Wallet browser extension** — [Install from 1AM](https://1am.xyz/install-beta)
   - Create or import a wallet on Midnight Preprod
   - Fund it with NIGHT tokens from the [Preprod Faucet](https://faucet.preprod.midnight.network)
