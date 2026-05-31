@@ -106,7 +106,7 @@ export async function joinKredzContract(_api: any, _address: string) {
   };
 }
 
-function createSessionProviders(api: any) {
+function createSessionProviders(_api: any) {
   return {
     zkConfigProvider: new FetchZkConfigProvider<any>(
       new URL('/contract/kredz-score-profile', window.location.origin).toString(),

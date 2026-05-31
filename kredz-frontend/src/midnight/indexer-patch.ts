@@ -11,7 +11,7 @@ function fromHex(hex: string): Uint8Array {
   return bytes;
 }
 
-export function createPatchedPublicDataProvider(queryUrl: string, subscriptionUrl: string) {
+export function createPatchedPublicDataProvider(queryUrl: string, _subscriptionUrl: string) {
   async function queryLatest(query: string, address: string) {
     const res = await fetch(queryUrl, {
       method: 'POST',
