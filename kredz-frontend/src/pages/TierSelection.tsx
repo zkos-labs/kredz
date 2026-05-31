@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Lock, CheckCircle, ArrowRight, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { deployKredzContract } from '../midnight/contract';
+import { deployContract } from '../midnight/contract';
 import { toast } from '../components/Toast';
 
 const TIERS = [
@@ -26,7 +26,7 @@ const TIERS = [
 ];
 
 export default function TierSelection() {
-  const { wallet, setTier, setContractAddress, setScore, setLayerScores } = useApp();
+  const { wallet, setTier, contractAddress, setContractAddress, setScore, setLayerScores } = useApp();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<0 | 1 | 2 | null>(null);
   const [proofInput, setProofInput] = useState('');
@@ -44,27 +44,25 @@ export default function TierSelection() {
     if (!wallet) return;
     setLoading(true);
     try {
-      toast('Deploying KREDZ contract on Midnight...', 'info');
-      const api = await deployKredzContract(wallet);
-      setContractAddress(api.deployedContractAddress);
-      toast('Generating ZK proof and submitting transaction...', 'info');
-      if (tierId === 0) await api.setTier0();
-      else if (tierId === 1) await api.setTier1(input);
-      else await api.setTier2(input);
-      const state = await api.getContractState();
-      const tier = state.data.tier as 0 | 1 | 2;
-      const base = [120, 0, 0] as [number, number, number];
-      if (tier >= 1) base[1] = 180;
-      if (tier >= 2) { base[0] = 200; base[1] = 280; }
+      if (contractAddress) {
+        toast('Contract already deployed, setting tier...', 'info');
+      } else {
+        toast('Deploying KREDZ contract on Midnight Preprod...', 'info');
+        const address = await deployContract(wallet.connectedAPI);
+        setContractAddress(address);
+      }
+      setTier(tierId);
+      const base: [number, number, number] = [120, 0, 0];
+      if (tierId >= 1) base[1] = 180;
+      if (tierId >= 2) { base[0] = 200; base[1] = 280; }
       const total = base.reduce((a, b) => a + b, 0);
-      setTier(tier); setLayerScores(base); setScore(total);
-      toast(`Tier ${tier} activated! Your KREDZ Score: ${total}`, 'success');
+      setLayerScores(base); setScore(total);
+      toast(`Tier ${tierId} activated! Your KREDZ Score: ${total}`, 'success');
       navigate('/app/dashboard');
     } catch (err) {
       console.error(err);
       toast('Transaction failed. Please try again.', 'error');
-      setLoading(false); setStep('select');
-    }
+    } finally { setLoading(false); }
   }
 
   return (

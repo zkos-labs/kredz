@@ -1,104 +1,130 @@
-// Compiled Midnight contract using 1AM wallet (dust-free proving via ProofStation).
-// The kredz.compact contract is now compiled. Real ZK circuits exist at:
-//   contracts/managed/kredz/keys/*.prover (6 circuits)
-//
-// ZK keys must be hosted on a CDN with CORS for FetchZkConfigProvider.
-// For local dev, point FetchZkConfigProvider to the /contracts/managed/kredz path.
-import type { ConnectedWallet } from '../hooks/useMidnightWallet';
-import type { KredzContractAPI } from '../contracts/kredz';
+import { setNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import { FetchZkConfigProvider } from '@midnight-ntwrk/midnight-js-fetch-zk-config-provider';
+import { CompiledContract } from '@midnight-ntwrk/compact-js';
+import { createUnprovenDeployTx, submitTxAsync } from '@midnight-ntwrk/midnight-js-contracts';
+import { sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
+import { toHex, fromHex } from './hex';
+import { createPatchedPublicDataProvider } from './indexer-patch';
+import { createPrivateStateProvider } from './private-state';
+import { makeWitnesses, persistSecret } from './witnesses';
+import type { ConnectedAPI } from './types';
 
-export async function deployKredzContract(wallet: ConnectedWallet): Promise<KredzContractAPI> {
-  // buildProviders() is skipped in production because @midnight-ntwrk/* packages
-  // are marked as external in vite.config.ts (WASM/Node.js modules don't bundle).
-  // The real deploy would use them, but the mock contract API doesn't need providers.
-  //
-  // When ready for real deploy on Midnight:
-  //   const providers = await buildProviders(wallet);
-  //   const compiled = CompiledContract.make('Kredz', Kredz).pipe(...);
-  //   const deployed = await deployContract(providers, { compiledContract: compiled });
+let cachedContract: any = null;
 
-  void wallet;
-
-  const mockAddress = `mock_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  console.log('[KREDZ] Using mock contract at:', mockAddress);
-  return createMockAPI(mockAddress);
+async function loadContract(): Promise<any> {
+  if (cachedContract) return cachedContract;
+  const mod = await import('../../contracts/managed/kredz-score-profile/contract/index.js');
+  cachedContract = mod.Contract;
+  return cachedContract;
 }
 
-export async function joinKredzContract(wallet: ConnectedWallet, address: string): Promise<KredzContractAPI> {
-  void wallet;
-  void address;
-  return createMockAPI(address);
+function getCompiledContract(): any {
+  if (!cachedContract) throw new Error('Contract not loaded');
+  return (CompiledContract.make as any)('kredz_score_profile', cachedContract).pipe(
+    (CompiledContract as any).withWitnesses(makeWitnesses()),
+    (CompiledContract as any).withCompiledFileAssets('/contract/kredz-score-profile'),
+  );
 }
 
-function createMockAPI(address: string): KredzContractAPI {
-  let mockTier = 0;
-  let mockScore = 0;
-  let mockEvmAddress = new Uint8Array(20);
-  let mockAttestation = new Uint8Array(32);
+function buildSessionProviders(api: ConnectedAPI) {
+  const zkConfigProvider = new FetchZkConfigProvider<any>(
+    new URL('/contract/kredz-score-profile', window.location.origin).toString(),
+    window.fetch.bind(window),
+  );
 
+  const publicDataProvider = createPatchedPublicDataProvider(
+    '', '',
+  );
+
+  const privateStateProvider = createPrivateStateProvider();
+
+  return { zkConfigProvider, publicDataProvider, privateStateProvider };
+}
+
+export async function deployContract(api: ConnectedAPI): Promise<string> {
+  const Contract = await loadContract();
+  const compiledContract = getCompiledContract();
+
+  const config = await api.getConfiguration();
+  setNetworkId(config.networkId);
+
+  const { zkConfigProvider, publicDataProvider, privateStateProvider } = buildSessionProviders(api);
+  const shielded = await api.getShieldedAddresses();
+  const provingProvider = await api.getProvingProvider(zkConfigProvider as any);
+
+  const walletProvider = {
+    getCoinPublicKey: () => shielded.shieldedCoinPublicKey,
+    getEncryptionPublicKey: () => shielded.shieldedEncryptionPublicKey,
+    balanceTx: async (tx: any) => {
+      const txHex = toHex(tx.serialize());
+      const balanced = await api.balanceUnsealedTransaction(txHex);
+      if (!balanced?.tx) throw new Error('balanceUnsealedTransaction failed');
+      const { Transaction } = await import('@midnight-ntwrk/ledger-v8');
+      return Transaction.deserialize('signature', 'proof', 'binding', fromHex(balanced.tx));
+    },
+  };
+
+  const midnightProvider = {
+    submitTx: async (tx: any) => {
+      const txHex = toHex(tx.serialize());
+      const result = await api.submitTransaction(txHex);
+      if (typeof result === 'string' && result) return result;
+      if (result?.transactionId) return result.transactionId;
+      if (result?.id) return result.id;
+      return txHex.slice(0, 64);
+    },
+  };
+
+  const providers = {
+    zkConfigProvider,
+    publicDataProvider,
+    privateStateProvider,
+    proofProvider: {
+      async proveTx(unprovenTx: any) {
+        const { CostModel } = await import('@midnight-ntwrk/ledger-v8');
+        return unprovenTx.prove(provingProvider, CostModel.initialCostModel());
+      },
+    },
+    walletProvider,
+    midnightProvider,
+  };
+
+  const deployTxData = await createUnprovenDeployTx(
+    { zkConfigProvider: providers.zkConfigProvider, walletProvider: providers.walletProvider },
+    { compiledContract, args: [], signingKey: sampleSigningKey() },
+  );
+
+  const contractAddress = deployTxData.public.contractAddress;
+
+  await submitTxAsync(providers as any, { unprovenTx: deployTxData.private.unprovenTx });
+
+  await privateStateProvider.setContractAddress(contractAddress);
+  await privateStateProvider.setSigningKey(contractAddress, deployTxData.private.signingKey);
+  await persistSecret({ providers: { privateStateProvider } } as any, contractAddress);
+
+  return contractAddress;
+}
+
+export async function waitForContractIndexed(
+  api: ConnectedAPI,
+  contractAddress: string,
+  maxAttempts = 30,
+): Promise<void> {
+  const config = await api.getConfiguration();
+  const publicDataProvider = createPatchedPublicDataProvider(config.indexerUri, config.indexerWsUri);
+  for (let i = 0; i < maxAttempts; i++) {
+    const state = await publicDataProvider.queryContractState(contractAddress);
+    if (state?.data) return;
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error('Contract not indexed after polling');
+}
+
+export async function joinKredzContract(_api: ConnectedAPI, _address: string) {
   return {
-    deployedContractAddress: address,
     async getContractState() {
-      return {
-        data: {
-          tier: mockTier,
-          scoreHash: new Uint8Array(32),
-          attestationTimestamp: BigInt(Date.now()),
-          evmAddress: mockEvmAddress,
-          solanaAddress: new Uint8Array(32),
-          scoreAttestation: mockAttestation,
-        },
-      };
+      return { data: { tier: 0 } };
     },
-    async getLedgerState() {
-      return {
-        ledgerState: {
-          tier: mockTier,
-          scoreHash: new Uint8Array(32),
-          attestationTimestamp: BigInt(Date.now()),
-          evmAddress: mockEvmAddress,
-          solanaAddress: new Uint8Array(32),
-          scoreAttestation: mockAttestation,
-        },
-      };
-    },
-    async setTier0() {
-      await new Promise(r => setTimeout(r, 1500));
-      mockTier = 0;
-      mockScore = Math.floor(Math.random() * 200) + 150;
-    },
-    async setTier1(attribute: string) {
-      await new Promise(r => setTimeout(r, 2000));
-      mockTier = 1;
-      mockScore = Math.floor(Math.random() * 250) + 350;
-      void attribute;
-    },
-    async setTier2(fullKyc: string) {
-      await new Promise(r => setTimeout(r, 2500));
-      mockTier = 2;
-      mockScore = Math.floor(Math.random() * 350) + 650;
-      void fullKyc;
-    },
-    async linkEvmAddress(addr: string) {
-      await new Promise(r => setTimeout(r, 1000));
-      const hex = addr.replace('0x', '').padEnd(40, '0').slice(0, 40);
-      mockEvmAddress = new Uint8Array(hex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
-    },
-    async linkSolanaAddress(addr: string) {
-      await new Promise(r => setTimeout(r, 1000));
-      void addr;
-    },
-    async updateScore(scoreData: string) {
-      await new Promise(r => setTimeout(r, 1000));
-      mockScore += Math.floor(Math.random() * 50) + 10;
-      const score = Math.min(mockScore, 1000);
-      mockAttestation = new Uint8Array(32);
-      mockAttestation[0] = (score >> 8) & 0xff;
-      mockAttestation[1] = score & 0xff;
-      mockAttestation.set(mockEvmAddress, 2);
-      const ts = BigInt(Date.now());
-      for (let i = 0; i < 8; i++) mockAttestation[22 + i] = Number((ts >> BigInt(56 - i * 8)) & 0xffn);
-      void scoreData;
-    },
+    async updateScore(_data: string) {},
   };
 }

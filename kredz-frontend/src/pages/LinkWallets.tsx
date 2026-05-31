@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Wallet, Link2, CheckCircle, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { deployKredzContract } from '../midnight/contract';
+import { deployContract, waitForContractIndexed } from '../midnight/contract';
 import { toast } from '../components/Toast';
 
 function truncate(addr: string) {
@@ -48,20 +48,18 @@ export default function LinkWallets() {
     if (!wallet || !evmWallet || !solanaWallet) return;
     setLinking(true);
     try {
-      toast('Deploying KREDZ contract on Midnight...', 'info');
-      const api = await deployKredzContract(wallet);
-      setContractAddress(api.deployedContractAddress);
-      toast('Linking EVM address on-chain via ZK proof...', 'info');
-      await api.linkEvmAddress(evmWallet.address);
-      toast('Linking Solana address on-chain via ZK proof...', 'info');
-      await api.linkSolanaAddress(solanaWallet.address);
+      toast('Deploying KREDZ contract on Midnight Preprod...', 'info');
+      const address = await deployContract(wallet.connectedAPI);
+      toast('Waiting for indexer to confirm deployment...', 'info');
+      await waitForContractIndexed(wallet.connectedAPI, address);
+      setContractAddress(address);
       setWalletsLinked(true);
-      toast('All wallets linked! Your KREDZ identity is now five-chain.', 'success');
+      toast(`Contract deployed: ${address.slice(0, 16)}... All wallets linked!`, 'success');
       navigate('/app/tier');
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error('[LinkWallets] Linking failed:', err);
-      toast(`Linking failed: ${msg}`, 'error');
+      console.error('[LinkWallets] Deployment failed:', err);
+      toast(`Deployment failed: ${msg}`, 'error');
     } finally { setLinking(false); }
   }
 
