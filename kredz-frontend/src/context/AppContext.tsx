@@ -1,10 +1,18 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { useMidnightWallet, type ConnectedWallet } from '../hooks/useMidnightWallet';
 import { useEvmWallet, type EvmWallet } from '../hooks/useEvmWallet';
 import { useSolanaWallet, type SolanaWallet } from '../hooks/useSolanaWallet';
 
 export type Tier = 0 | 1 | 2 | null;
 export type ActiveChain = 'midnight' | 'base' | 'solana';
+
+const MODULE_XP: Record<string, number> = {
+  'defi-mechanics': 50,
+  'risk-management': 60,
+  'zk-privacy-basics': 70,
+  'midnight-ecosystem': 65,
+  'credit-fundamentals': 45,
+};
 
 interface AppContextValue {
   wallet: ConnectedWallet | null;
@@ -71,6 +79,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try { return JSON.parse(localStorage.getItem('kredz_modules') || '[]'); }
     catch { return []; }
   });
+
+  // Recalculate Layer 3 score from completed modules on mount
+  useEffect(() => {
+    if (completedModules.length > 0 && layerScores[2] === 0) {
+      const earnedXp = completedModules.reduce((sum, id) => sum + (MODULE_XP[id] ?? 0), 0);
+      const layer3 = Math.min(earnedXp, 200);
+      const delta = layer3 - layerScores[2];
+      setLayerScores([layerScores[0], layerScores[1], layer3]);
+      setScore(prev => prev + delta);
+    }
+  }, []);
   const [baseScore, setBaseScore] = useState(0);
   const [baseScoreTimestamp, setBaseScoreTimestamp] = useState<number | null>(null);
   const [solanaScore, setSolanaScore] = useState(0);
