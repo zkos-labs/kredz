@@ -4,6 +4,21 @@
 
 > kredz.xyz bridges crypto-native users to institutional lenders through dual-privacy credit scoring: ZK proofs on Midnight + sub-transaction privacy on Canton.
 
+## Project Structure
+
+This repo contains two frontend apps plus backend contracts:
+
+| Directory | What it is | Deployed at | Key commands |
+|-----------|-----------|-------------|--------------|
+| **`kredz-midnight/`** | Midnight SDK fellowship app — the dedicated Compact contract, 1AM wallet integration, and ZK circuits | Run locally | `npm ci && npm run compile && npm run sync-zk && npm run dev` |
+| **`kredz-frontend/`** | Multichain landing page + dashboard — connects all 5 networks, deploys contract on Midnight, shows scores | [kredz.xyz](https://kredz.xyz) | `npm install && npm run dev` |
+| `contracts/` | Foundry Solidity contracts for Base (EVM) | Base Sepolia | `forge test && forge script` |
+| `solana/` | Anchor program for Solana SVM portability | Solana Devnet | `anchor build && anchor deploy` |
+| `canton/` | DAML contracts + Zenith EVM for institutional lending | Local docker | `docker compose up` |
+| `backend/` | Scoring engine (Node.js + Python XGBoost) | Local | `npm run dev` |
+
+**The reviewer should use `kredz-midnight/`** — it contains the Compact contract with privacy features and the real Midnight SDK integration.
+
 | Network | Role | Language | Status |
 |---------|------|----------|--------|
 | Midnight | Credit identity · ZK scoring | Compact | Compiled (5 circuits) · Preprod |
