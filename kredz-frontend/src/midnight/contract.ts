@@ -7,7 +7,6 @@ import { toHex, fromHex } from './hex';
 import { createPatchedPublicDataProvider } from './indexer-patch';
 import { createPrivateStateProvider } from './private-state';
 import { makeWitnesses, persistSecret } from './witnesses';
-import type { ConnectedAPI } from './types';
 
 let cachedContract: any = null;
 
@@ -26,58 +25,20 @@ function getCompiledContract(): any {
   );
 }
 
-function buildSessionProviders(api: ConnectedAPI) {
-  const zkConfigProvider = new FetchZkConfigProvider<any>(
-    new URL('/contract/kredz-score-profile', window.location.origin).toString(),
-    window.fetch.bind(window),
-  );
-
-  const publicDataProvider = createPatchedPublicDataProvider(
-    '', '',
-  );
-
-  const privateStateProvider = createPrivateStateProvider();
-
-  return { zkConfigProvider, publicDataProvider, privateStateProvider };
-}
-
-export async function deployContract(api: ConnectedAPI): Promise<string> {
-  const Contract = await loadContract();
+export async function deployContract(api: any): Promise<string> {
+  await loadContract();
   const compiledContract = getCompiledContract();
 
   const config = await api.getConfiguration();
   setNetworkId(config.networkId);
 
-  const { zkConfigProvider, publicDataProvider, privateStateProvider } = buildSessionProviders(api);
+  const { zkConfigProvider } = createSessionProviders(api);
   const shielded = await api.getShieldedAddresses();
   const provingProvider = await api.getProvingProvider(zkConfigProvider as any);
+  const privateStateProvider = createPrivateStateProvider();
 
-  const walletProvider = {
-    getCoinPublicKey: () => shielded.shieldedCoinPublicKey,
-    getEncryptionPublicKey: () => shielded.shieldedEncryptionPublicKey,
-    balanceTx: async (tx: any) => {
-      const txHex = toHex(tx.serialize());
-      const balanced = await api.balanceUnsealedTransaction(txHex);
-      if (!balanced?.tx) throw new Error('balanceUnsealedTransaction failed');
-      const { Transaction } = await import('@midnight-ntwrk/ledger-v8');
-      return Transaction.deserialize('signature', 'proof', 'binding', fromHex(balanced.tx));
-    },
-  };
-
-  const midnightProvider = {
-    submitTx: async (tx: any) => {
-      const txHex = toHex(tx.serialize());
-      const result = await api.submitTransaction(txHex);
-      if (typeof result === 'string' && result) return result;
-      if (result?.transactionId) return result.transactionId;
-      if (result?.id) return result.id;
-      return txHex.slice(0, 64);
-    },
-  };
-
-  const providers = {
+  const providers: any = {
     zkConfigProvider,
-    publicDataProvider,
     privateStateProvider,
     proofProvider: {
       async proveTx(unprovenTx: any) {
@@ -85,18 +46,34 @@ export async function deployContract(api: ConnectedAPI): Promise<string> {
         return unprovenTx.prove(provingProvider, CostModel.initialCostModel());
       },
     },
-    walletProvider,
-    midnightProvider,
+    walletProvider: {
+      getCoinPublicKey: () => shielded.shieldedCoinPublicKey,
+      getEncryptionPublicKey: () => shielded.shieldedEncryptionPublicKey,
+      balanceTx: async (tx: any) => {
+        const txHex = toHex(tx.serialize());
+        const balanced = await api.balanceUnsealedTransaction(txHex);
+        if (!balanced?.tx) throw new Error('balanceUnsealedTransaction failed');
+        const { Transaction } = await import('@midnight-ntwrk/ledger-v8');
+        return Transaction.deserialize('signature', 'proof', 'binding', fromHex(balanced.tx));
+      },
+    },
+    midnightProvider: {
+      submitTx: async (tx: any) => {
+        const txHex = toHex(tx.serialize());
+        const result = await api.submitTransaction(txHex);
+        return (result as any)?.transactionId ?? (result as any)?.id ?? String(txHex.slice(0, 64));
+      },
+    },
   };
 
-  const deployTxData = await createUnprovenDeployTx(
-    { zkConfigProvider: providers.zkConfigProvider, walletProvider: providers.walletProvider },
-    { compiledContract, args: [], signingKey: sampleSigningKey() },
-  );
+  const deployTxData = await createUnprovenDeployTx(providers, {
+    compiledContract,
+    args: [],
+    signingKey: sampleSigningKey(),
+  } as any);
 
   const contractAddress = deployTxData.public.contractAddress;
-
-  await submitTxAsync(providers as any, { unprovenTx: deployTxData.private.unprovenTx });
+  await submitTxAsync(providers, { unprovenTx: deployTxData.private.unprovenTx } as any);
 
   await privateStateProvider.setContractAddress(contractAddress);
   await privateStateProvider.setSigningKey(contractAddress, deployTxData.private.signingKey);
@@ -106,7 +83,7 @@ export async function deployContract(api: ConnectedAPI): Promise<string> {
 }
 
 export async function waitForContractIndexed(
-  api: ConnectedAPI,
+  api: any,
   contractAddress: string,
   maxAttempts = 30,
 ): Promise<void> {
@@ -120,11 +97,20 @@ export async function waitForContractIndexed(
   throw new Error('Contract not indexed after polling');
 }
 
-export async function joinKredzContract(_api: ConnectedAPI, _address: string) {
+export async function joinKredzContract(_api: any, _address: string) {
   return {
     async getContractState() {
       return { data: { tier: 0 } };
     },
     async updateScore(_data: string) {},
+  };
+}
+
+function createSessionProviders(api: any) {
+  return {
+    zkConfigProvider: new FetchZkConfigProvider<any>(
+      new URL('/contract/kredz-score-profile', window.location.origin).toString(),
+      window.fetch.bind(window),
+    ),
   };
 }

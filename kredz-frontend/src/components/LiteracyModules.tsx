@@ -66,7 +66,7 @@ export function LiteracyModules() {
     if (!mod || !wallet || !contractAddress) return;
     setSubmitting(true);
     try {
-      const api = await joinKredzContract(wallet, contractAddress);
+      const api = await joinKredzContract(wallet.connectedAPI, contractAddress);
       await api.updateScore(`module:${mod.id},xp:${mod.xp}`);
       completeModule(mod.id);
       const xpGain = Math.floor(mod.xp * (answers.filter(Boolean).length / answers.length));

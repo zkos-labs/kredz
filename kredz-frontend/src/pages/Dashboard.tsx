@@ -78,7 +78,7 @@ export default function Dashboard() {
     if (!wallet || !contractAddress) return;
     setRefreshing(true);
     try {
-      const api = await joinKredzContract(wallet, contractAddress);
+      const api = await joinKredzContract(wallet.connectedAPI, contractAddress);
       const state = await api.getContractState();
       const t = state.data.tier as 0 | 1 | 2;
       const base: [number, number, number] = [120, 0, layerScores[2]];

@@ -40,7 +40,7 @@ export default function TierSelection() {
     if (tier.proof) setStep('prove'); else await submitTier(tierId, '');
   }
 
-  async function submitTier(tierId: 0 | 1 | 2, input: string) {
+  async function submitTier(tierId: 0 | 1 | 2, _input: string) {
     if (!wallet) return;
     setLoading(true);
     try {
