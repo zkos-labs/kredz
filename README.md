@@ -6,18 +6,26 @@
 
 ## Project Structure
 
-This repo contains two frontend apps plus backend contracts:
+| Directory | What it is | Key commands |
+|-----------|-----------|--------------|
+| **`kredz-midnight/`** | Compact contract source + compile pipeline | `npm ci && npm run compile && npm run sync-zk` |
+| **`kredz-frontend/`** | Multichain landing page + dashboard + Midnight deploy | `npm install && npm run dev` |
+| `contracts/` | Foundry Solidity contracts for Base (EVM) | `forge test && forge script` |
+| `solana/` | Anchor program for Solana SVM portability | `anchor build && anchor deploy` |
+| `canton/` | DAML contracts + Zenith EVM for institutional lending | `docker compose up` |
+| `backend/` | Scoring engine (Node.js + Python XGBoost) | `npm run dev` |
 
-| Directory | What it is | Deployed at | Key commands |
-|-----------|-----------|-------------|--------------|
-| **`kredz-midnight/`** | Midnight SDK fellowship app — the dedicated Compact contract, 1AM wallet integration, and ZK circuits | Run locally | `npm ci && npm run compile && npm run sync-zk && npm run dev` |
-| **`kredz-frontend/`** | Multichain landing page + dashboard — connects all 5 networks, deploys contract on Midnight, shows scores | [kredz.xyz](https://kredz.xyz) | `npm install && npm run dev` |
-| `contracts/` | Foundry Solidity contracts for Base (EVM) | Base Sepolia | `forge test && forge script` |
-| `solana/` | Anchor program for Solana SVM portability | Solana Devnet | `anchor build && anchor deploy` |
-| `canton/` | DAML contracts + Zenith EVM for institutional lending | Local docker | `docker compose up` |
-| `backend/` | Scoring engine (Node.js + Python XGBoost) | Local | `npm run dev` |
+**kredz-midnight** compiles the Compact contract (5 ZK circuits) and syncs assets to kredz-frontend. **kredz-frontend** is the user-facing app that deploys and interacts with the contract on Midnight Preprod via the 1AM wallet.
 
-**The reviewer should use `kredz-midnight/`** — it contains the Compact contract with privacy features and the real Midnight SDK integration.
+## Quick Start
+
+```bash
+cd kredz-midnight
+npm ci && npm run compile && npm run sync-zk
+
+cd ../kredz-frontend
+npm install && npm run dev        # http://localhost:5173
+```
 
 | Network | Role | Language | Status |
 |---------|------|----------|--------|
