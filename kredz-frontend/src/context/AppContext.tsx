@@ -58,9 +58,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [activeChain, setActiveChain] = useState<ActiveChain>('midnight');
   const [tier, setTier] = useState<Tier>(null);
-  const [contractAddress, setContractAddress] = useState<string | null>(() =>
-    localStorage.getItem('kredz_contract_address')
-  );
+  const [contractAddress, setContractAddress] = useState<string | null>(() => {
+    const stored = localStorage.getItem('kredz_contract_address');
+    if (stored?.startsWith('mock_')) { localStorage.removeItem('kredz_contract_address'); return null; }
+    if (stored?.startsWith('0x') || stored?.length > 40) return stored;
+    localStorage.removeItem('kredz_contract_address');
+    return null;
+  });
   const [score, setScore] = useState(0);
   const [layerScores, setLayerScores] = useState<[number, number, number]>([0, 0, 0]);
   const [completedModules, setCompletedModules] = useState<string[]>(() => {
