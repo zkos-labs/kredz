@@ -75,19 +75,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
   const [score, setScore] = useState(0);
   const [layerScores, setLayerScores] = useState<[number, number, number]>([0, 0, 0]);
-  const [completedModules, setCompletedModules] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem('kredz_modules') || '[]'); }
-    catch { return []; }
-  });
+  const [completedModules, setCompletedModules] = useState<string[]>(() => []);
 
-  // Recalculate Layer 3 score from completed modules on mount
   useEffect(() => {
-    if (completedModules.length > 0 && layerScores[2] === 0) {
-      const earnedXp = completedModules.reduce((sum, id) => sum + (MODULE_XP[id] ?? 0), 0);
-      const layer3 = Math.min(earnedXp, 200);
-      const delta = layer3 - layerScores[2];
-      setLayerScores([layerScores[0], layerScores[1], layer3]);
-      setScore(prev => prev + delta);
+    const stored = localStorage.getItem('kredz_modules');
+    if (stored) {
+      try {
+        const modules = JSON.parse(stored);
+        if (Array.isArray(modules) && modules.length > 0) {
+          const earnedXp = modules.reduce((sum: number, id: string) => sum + (MODULE_XP[id] ?? 0), 0);
+          const layer3 = Math.min(earnedXp, 200);
+          setLayerScores([0, 0, layer3]);
+          setScore(prev => prev + layer3);
+        }
+      } catch {}
+      localStorage.removeItem('kredz_modules');
     }
   }, []);
   const [baseScore, setBaseScore] = useState(0);
