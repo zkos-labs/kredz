@@ -1,5 +1,7 @@
 # KREDZ — Privacy-Preserving Credit Identity Protocol
 
+This project is built on the Midnight Network.
+
 **Midnight Network × Canton Network × Base (EVM) × Solana × Cardano**
 
 > kredz.xyz bridges crypto-native users to institutional lenders through dual-privacy credit scoring: ZK proofs on Midnight + sub-transaction privacy on Canton.
@@ -296,4 +298,4 @@ kredz.xyz is agent-ready with Cloudflare's standards:
 
 ## License
 
-MIT
+This project is licensed under the Apache License, Version 2.0 — see [LICENSE](LICENSE) for details.
