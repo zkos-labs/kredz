@@ -13,8 +13,8 @@ export async function buildProviders(connected: ConnectedWallet) {
     import('@midnight-ntwrk/midnight-js-indexer-public-data-provider'),
   ]);
 
-  const zkConfigProvider = new FetchZkConfigProvider(
-    '/contracts/managed/kredz',  // ZK keys served from local dev server or CDN
+  const zkConfigProvider = new FetchZkConfigProvider<any>(
+    new URL('/contract/kredz-score-profile', window.location.origin).toString(),
     fetch.bind(window),
   );
 

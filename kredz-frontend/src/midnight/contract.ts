@@ -97,10 +97,31 @@ export async function waitForContractIndexed(
   throw new Error('Contract not indexed after polling');
 }
 
-export async function joinKredzContract(_api: any, _address: string) {
+export async function joinKredzContract(api: any, address: string) {
+  const config = await api.getConfiguration();
+  const publicDataProvider = createPatchedPublicDataProvider(config.indexerUri, config.indexerWsUri);
+
+  const { ledger } = await import('../../contracts/managed/kredz-score-profile/contract/index.js');
+
   return {
     async getContractState() {
-      return { data: { tier: 0 } };
+      const contractState = await publicDataProvider.queryContractState(address);
+      if (!contractState?.data) {
+        return { data: { tier: 0 as const, tiers: { isEmpty: () => true } } };
+      }
+      const contractLedger = ledger(contractState.data);
+      const tiers = contractLedger.tiers;
+      const hasTier = !tiers.isEmpty();
+      const tier = hasTier ? Number(tiers.lookup(new Uint8Array(32))) : 0;
+      return {
+        data: {
+          tier: Math.min(Math.max(tier, 0), 2) as 0 | 1 | 2,
+          tiers: contractLedger.tiers,
+          score_hashes: contractLedger.score_hashes,
+          total_users: contractLedger.total_users,
+          attestor_key: contractLedger.attestor_key,
+        },
+      };
     },
     async updateScore(_data: string) {},
   };

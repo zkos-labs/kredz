@@ -1,3 +1,5 @@
+import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
+
 let cachedSecret: Uint8Array | null = null;
 
 function getOrCreateSecret(): Uint8Array {
@@ -14,9 +16,9 @@ export async function persistSecret(
   getOrCreateSecret();
 }
 
-export function attestorSecret(context: { privateState: any }): [any, Uint8Array] {
-  const ps = context.privateState ?? {};
-  const secret = (ps as any).attestorSecret ?? getOrCreateSecret();
+export function attestorSecret(context: WitnessContext): [any, Uint8Array] {
+  const ps = (context as any).privateState ?? {};
+  const secret = ps.attestorSecret ?? getOrCreateSecret();
   return [{ ...ps, attestorSecret: secret }, secret];
 }
 

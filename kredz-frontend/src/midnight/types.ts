@@ -20,18 +20,20 @@ export interface Configuration {
   networkId: string;
   indexerUri: string;
   indexerWsUri: string;
-  proverServerUri: string;
+  proverServerUri?: string;
   substrateNodeUri: string;
 }
 
 export interface ProvingProvider {
-  prove(input: Uint8Array): Promise<Uint8Array>;
+  prove(serializedPreimage: Uint8Array, keyLocation: string): Promise<Uint8Array>;
 }
 
 // window.midnight['1am'] before connect
 export interface InitialAPI {
+  rdns: string;
   connect(networkId: string): Promise<ConnectedAPI>;
   name: string;
+  icon: string;
   apiVersion: string;
 }
 

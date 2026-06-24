@@ -174,7 +174,7 @@ kredz/
     "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "4.0.4",
     "@midnight-ntwrk/midnight-js-network-id": "4.0.4",
     "@midnight-ntwrk/midnight-js-types": "4.0.4",
-    "@midnight-ntwrk/midnight-js-utils": "4.0.2",
+    "@midnight-ntwrk/midnight-js-utils": "4.0.4",
     "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0"
   },
   "vite-plugins": {
@@ -183,7 +183,8 @@ kredz/
     "vite-plugin-node-polyfills": "0.26.0"
   },
   "overrides": {
-    "@midnight-ntwrk/ledger-v8": "8.0.3"
+    "@midnight-ntwrk/ledger-v8": "8.0.3",
+    "@midnight-ntwrk/midnight-js-utils": "4.0.4"
   }
 }
 ```
@@ -193,11 +194,12 @@ kredz/
 Both `kredz-midnight/package.json` and `kredz-frontend/package.json` have:
 ```json
 "overrides": {
-  "@midnight-ntwrk/ledger-v8": "8.0.3"
+  "@midnight-ntwrk/ledger-v8": "8.0.3",
+  "@midnight-ntwrk/midnight-js-utils": "4.0.4"
 }
 ```
 
-Without this, `midnight-js-contracts` and `midnight-js-types` each pull their own nested copy of `ledger-v8`, causing `instanceof _CostModel` failures at runtime. **Never remove this override.**
+Without these, `midnight-js-contracts` and `midnight-js-types` each pull their own nested copy of `ledger-v8`, causing `instanceof _CostModel` failures at runtime. Similarly, `midnight-js-utils` gets duplicated at different versions, causing type identity mismatches. **Never remove these overrides.**
 
 ---
 
@@ -628,6 +630,7 @@ vercel --prod -y
 |---|---------|-------|-----|
 | 1 | `withVacantWitnesses` causes deploy failure | No witness function wired for `attestorSecret` | Use `withWitnesses(makeWitnesses())` |
 | 2 | `expected instance of _CostModel` at runtime | Two copies of `ledger-v8` in node_modules | Add `"overrides": {"@midnight-ntwrk/ledger-v8": "8.0.3"}` |
+| 2b | Type identity mismatch at runtime | Three copies of `midnight-js-utils` at different versions | Add `"overrides": {"@midnight-ntwrk/midnight-js-utils": "4.0.4"}` and pin direct dep to `4.0.4` |
 | 3 | `deployContract` hangs forever on Preprod | Internal `watchForTxData` blocks indefinitely | Use `createUnprovenDeployTx` + `submitTxAsync` |
 | 4 | `deployContract` returns but contract not found | Indexer lag (10-120s) | Poll with `waitForContractIndexed()` |
 | 5 | TS6 features fail on Vercel build | `erasableSyntaxOnly`, `es2023` target require TS 6 | Use `target: "esnext"`, remove TS6-only options |

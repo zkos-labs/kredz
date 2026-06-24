@@ -19,7 +19,7 @@
     "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "4.0.4",
     "@midnight-ntwrk/midnight-js-network-id": "4.0.4",
     "@midnight-ntwrk/midnight-js-types": "4.0.4",
-    "@midnight-ntwrk/midnight-js-utils": "4.0.2",
+    "@midnight-ntwrk/midnight-js-utils": "4.0.4",
     "@midnight-ntwrk/wallet-sdk-address-format": "3.1.0",
     "@solana/web3.js": "1.98.4",
     "@tailwindcss/vite": "4.2.4",
@@ -32,7 +32,8 @@
     "tailwindcss": "4.2.4"
   },
   "overrides": {
-    "@midnight-ntwrk/ledger-v8": "8.0.3"
+    "@midnight-ntwrk/ledger-v8": "8.0.3",
+    "@midnight-ntwrk/midnight-js-utils": "4.0.4"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
