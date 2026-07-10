@@ -1,10 +1,57 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Shield, Zap, BookOpen, TrendingUp, Users, Globe } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WordsPullUp } from '../components/WordsPullUp';
+import { TypewriterSequence } from '../components/TypewriterSequence';
+import { NarrativeBlock } from '../components/NarrativeBlock';
+import { FieldReportCarousel } from '../components/FieldReportCarousel';
 import { toast } from '../components/Toast';
+
+// ── Chapter 1: The Hook (typewriter lines for hero) ──
+const HERO_LINES = [
+  { text: 'You have built something real.', pause: 900 },
+  { text: 'You have paid every loan on time.', pause: 700 },
+  { text: 'You have never missed a payment.', pause: 800 },
+  { text: 'Not once.', pause: 1200 },
+  { text: 'And yet.', pause: 1500 },
+  { text: 'When you apply for credit...', pause: 600 },
+  { text: 'they ask for your entire financial life.', pause: 800 },
+  { text: 'Every transaction.', pause: 500 },
+  { text: 'Every balance.', pause: 500 },
+  { text: 'Every wallet you ever touched.', pause: 1000 },
+  { text: 'You hesitate.', pause: 800 },
+  { text: 'You are not hiding anything.', pause: 600, backspaces: [{ word: 'hiding', replacement: 'just not interested in being naked' }], pause: 1500 },
+  { text: 'What if you could prove your credit...', pause: 600 },
+  { text: 'without revealing your credit.', pause: 1000 },
+  { text: 'What if the math spoke for you.', pause: 700 },
+  { text: 'What if the proof was enough.', pause: 1200 },
+];
+
+// ── Chapter 5: Field Reports ──
+const FIELD_REPORTS = [
+  {
+    quote: 'A lending protocol on Base asked for my entire wallet history. I said no. I showed them my KREDZ proof instead. Approved in twelve seconds.',
+    attribution: 'DeFi Power User',
+    context: 'Tier 1 / Base Sepolia',
+  },
+  {
+    quote: 'Three years of DeFi. Hundreds of loans. Zero defaults. Traditional credit score: nonexistent. KREDZ score: 847. Guess which one the Canton lender accepted.',
+    attribution: 'Yield Strategist',
+    context: 'Tier 2 / Canton + Base',
+  },
+  {
+    quote: 'I was Tier 0 for six months. Anonymous proof, no data shared. When I needed a larger line, I upgraded to Tier 2 in one click. Same score. Institutional ready. Same me.',
+    attribution: 'Privacy Advocate',
+    context: 'Tier 0 → Tier 2 / Midnight',
+  },
+  {
+    quote: 'My Cardano wallet history finally matters. Five years of staking. Hundreds of transactions. All invisible to lenders. Until KREDZ.',
+    attribution: 'Cardano OG',
+    context: 'Tier 1 / Cardano + Midnight',
+  },
+];
 
 const TIERS = [
   {
@@ -49,6 +96,7 @@ export default function Landing() {
   const heroY = useTransform(scrollYProgress, [0, 0.6], [0, -60]);
   const { wallet, connect, isConnecting } = useApp();
   const navigate = useNavigate();
+  const [typewriterDone, setTypewriterDone] = useState(false);
 
   async function handleLaunch() {
     if (wallet) { navigate('/app'); return; }
@@ -66,7 +114,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-black text-[#E1E0CC]">
 
-      {/* ═══ HERO ═══ */}
+      {/* ═══ CHAPTER 1: THE HOOK ═══ */}
       <section ref={heroRef} className="relative h-screen p-4 md:p-6">
         <div className="relative h-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-black">
 
@@ -98,19 +146,20 @@ export default function Landing() {
                 />
               </div>
 
-              {/* Text + CTA */}
-              <div className="md:col-span-4 flex flex-col justify-end gap-4 md:gap-6 pb-1">
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-[#DEDBC8]/70 text-xs md:text-sm leading-[1.4]"
-                >
-                  Privacy-preserving AI credit scoring across five networks. Build your score once. Use it everywhere. ZK proofs protect your data. Sub-transaction privacy protects your lenders.
-                </motion.p>
+              {/* Narrative typewriter + CTA */}
+              <div className="md:col-span-4 flex flex-col justify-end gap-3 md:gap-4 pb-1">
+                <div className="min-h-[140px] md:min-h-[180px]">
+                  <TypewriterSequence
+                    lines={HERO_LINES}
+                    onComplete={() => setTypewriterDone(true)}
+                    className="text-[#DEDBC8]/70 text-xs md:text-sm leading-[1.5]"
+                  />
+                </div>
 
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={typewriterDone ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="group"
                 >
                   <button
@@ -142,12 +191,36 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ═══ CHAPTER 2: THE ESCALATION ═══ */}
+      <section className="relative px-4 md:px-12 py-16 md:py-24 max-w-4xl mx-auto">
+        <NarrativeBlock
+          paragraphs={[
+            'You tried to do it the old way.',
+            'You uploaded bank statements. Tax returns. Pay stubs.',
+            'You waited two weeks for a credit decision.',
+            'You got rejected because the algorithm did not understand your yield strategy.',
+            'You tried to explain that your net worth is onchain.',
+            'They asked for a PDF.',
+            'They asked for a PDF of your wallet.',
+            'You realized then: the bridge does not exist.',
+            'Either you stay anonymous and untrusted.',
+            'Or you expose everything and hope they do not misuse it.',
+            'There is no middle ground.',
+            'Or there was not.',
+            'Until now.',
+          ]}
+          className="text-center"
+          paragraphClassName="text-[#DEDBC8]/60 text-base md:text-lg leading-relaxed mb-3"
+          staggerDelay={0.1}
+        />
+      </section>
+
       {/* ═══ HOW IT WORKS ═══ */}
       <section id="how-it-works" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
         <div className="text-center mb-8 md:mb-16">
           <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Three-Layer Scoring</p>
           <WordsPullUp
-            text="How KREDZ Scores You"
+            text="How Your Score Is Built"
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-[#E1E0CC] leading-[0.95]"
           />
           <motion.p
@@ -155,7 +228,7 @@ export default function Landing() {
             transition={{ delay: 0.3 }}
             className="text-[#DEDBC8]/50 mt-4 max-w-xl mx-auto text-sm md:text-base"
           >
-            A single KREDZ Score (0-1000) fused from three distinct signal layers, updated continuously.
+            A single KREDZ Score fused from three distinct signal layers, updated continuously.
           </motion.p>
         </div>
         <div className="grid md:grid-cols-3 gap-4 md:gap-6">
@@ -181,7 +254,29 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══ FOUR NETWORKS ═══ */}
+      {/* ═══ CHAPTER 3: THE DISCOVERY ═══ */}
+      <section className="relative px-4 md:px-12 py-16 md:py-24 max-w-4xl mx-auto">
+        <div className="w-px h-12 bg-gradient-to-b from-transparent via-[#DEDBC8]/10 to-transparent mx-auto mb-12" />
+        <NarrativeBlock
+          paragraphs={[
+            'KREDZ is a privacy-preserving credit identity.',
+            'It lives on Midnight. It proves itself on Base. It travels to Solana.',
+            'It reaches into Canton for institutional lenders.',
+            'It speaks to Cardano for wallet history.',
+            'Five networks. One score. Zero exposure.',
+          ]}
+          paragraphClassName="text-[#DEDBC8]/60 text-base md:text-lg leading-relaxed mb-3"
+        />
+        <motion.p
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          transition={{ delay: 0.6 }}
+          className="text-[#DEDBC8]/80 text-base md:text-lg leading-relaxed mt-6 text-center"
+        >
+          A ZK proof attests your creditworthiness. Not your transaction history. Not your wallet balances. Not your name. <span className="text-[#DEDBC8]">Just the proof.</span>
+        </motion.p>
+      </section>
+
+      {/* ═══ NETWORKS ═══ */}
       <section id="networks" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
         <div className="text-center mb-8 md:mb-16">
           <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">One Score, Five Networks</p>
@@ -215,10 +310,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══ TIERS ═══ */}
+      {/* ═══ CHAPTER 4: THE ARSENAL ═══ */}
       <section id="tiers" className="relative px-4 md:px-12 py-16 md:py-28 max-w-6xl mx-auto">
         <div className="text-center mb-8 md:mb-16">
-          <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Privacy Tiers</p>
+          <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">What You Now Hold</p>
           <WordsPullUp
             text="Choose Your Privacy Level"
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-[#E1E0CC] leading-[0.95]"
@@ -228,7 +323,7 @@ export default function Landing() {
             transition={{ delay: 0.3 }}
             className="text-[#DEDBC8]/50 mt-4 max-w-xl mx-auto text-sm md:text-base"
           >
-            Selective disclosure lets you prove creditworthiness at your own comfort level.
+            You control what they see. Same score. Same you. Different lens.
           </motion.p>
         </div>
         <div className="grid md:grid-cols-3 gap-4 md:gap-6">
@@ -272,11 +367,85 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══ CTA ═══ */}
+      {/* ═══ CHAPTER 5: THE PROOF ═══ */}
       <section className="relative px-4 md:px-12 py-16 md:py-28 bg-noise">
+        <div className="max-w-3xl mx-auto relative z-10">
+          <NarrativeBlock
+            paragraphs={[
+              'Messages from those who crossed before you.',
+            ]}
+            className="text-center mb-10"
+            paragraphClassName="text-[#DEDBC8] uppercase tracking-[0.2em] text-[10px] sm:text-xs"
+          />
+          <FieldReportCarousel
+            reports={FIELD_REPORTS}
+            className="mb-8"
+          />
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="text-center text-[#DEDBC8]/30 text-sm"
+          >
+            These are not testimonials. These are proof of concept. This works.
+          </motion.p>
+        </div>
+      </section>
 
-        {/* ── TOOLS ── */}
-        <div className="max-w-4xl mx-auto mb-20 relative z-10">
+      {/* ═══ CHAPTER 6: THE CHOICE ═══ */}
+      <section className="relative px-4 md:px-12 py-16 md:py-28">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="max-w-3xl mx-auto text-center relative z-10"
+        >
+          <NarrativeBlock
+            paragraphs={[
+              'You have read the story.',
+              'But you already knew the ending.',
+              'Because you have been waiting for this.',
+            ]}
+            className="mb-8"
+            paragraphClassName="text-[#DEDBC8]/50 text-base md:text-lg leading-relaxed mb-2"
+            staggerDelay={0.1}
+          />
+
+          <Users size={40} className="text-[#DEDBC8] mx-auto mb-6 opacity-40" />
+          <WordsPullUp
+            text="Start Your Story"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-[#E1E0CC] leading-[0.95]"
+          />
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="text-[#DEDBC8]/50 mt-4 max-w-lg mx-auto text-sm md:text-base"
+          >
+            <span className="text-[#DEDBC8]">Your secrets stay yours. Your reputation goes everywhere.</span>
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="text-[#DEDBC8]/40 mt-4 mb-10 max-w-md mx-auto text-sm leading-relaxed"
+          >
+            Link your wallets. Generate your proof. Claim your score. The infrastructure is live across five networks. The only missing piece is you.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.6 }} className="group inline-flex"
+          >
+            <button
+              onClick={handleLaunch}
+              disabled={isConnecting}
+              className="flex items-center gap-2 pl-6 pr-2 py-3 rounded-full bg-[#DEDBC8] text-black font-medium text-base transition-all hover:gap-3 disabled:opacity-50"
+            >
+              {isConnecting ? 'Connecting...' : 'Get Your Score'}
+              <span className="bg-black rounded-full w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Zap size={15} className="text-[#E1E0CC]" />
+              </span>
+            </button>
+          </motion.div>
+        </motion.div>
+
+        {/* ── INFRASTRUCTURE ── */}
+        <div className="max-w-4xl mx-auto mt-24 relative z-10">
           <div className="text-center mb-10">
             <p className="text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Infrastructure</p>
             <h2 className="text-2xl sm:text-3xl font-medium text-[#E1E0CC]">Powered By</h2>
@@ -302,46 +471,6 @@ export default function Landing() {
             </div>
           </div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          className="max-w-3xl mx-auto text-center relative z-10"
-        >
-          <Users size={40} className="text-[#DEDBC8] mx-auto mb-6 opacity-40" />
-          <WordsPullUp
-            text="Build Your Credit Score"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-[#E1E0CC] leading-[0.95]"
-          />
-          <motion.p
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="text-[#DEDBC8]/50 mt-4 max-w-lg mx-auto text-sm md:text-base"
-          >
-            <span className="text-[#DEDBC8]">Without Sacrificing Privacy</span>
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="text-[#DEDBC8]/40 mt-4 mb-10 max-w-lg mx-auto text-sm leading-relaxed"
-          >
-            Connect your 1AM wallet, link Base, Solana, Canton, select your tier, and start building your KREDZ Score, provable across five networks.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: 0.5 }} className="group inline-flex"
-          >
-            <button
-              onClick={handleLaunch}
-              disabled={isConnecting}
-              className="flex items-center gap-2 pl-6 pr-2 py-3 rounded-full bg-[#DEDBC8] text-black font-medium text-base transition-all hover:gap-3 disabled:opacity-50"
-            >
-              {isConnecting ? 'Connecting...' : 'Get Your Score'}
-              <span className="bg-black rounded-full w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Zap size={15} className="text-[#E1E0CC]" />
-              </span>
-            </button>
-          </motion.div>
-        </motion.div>
       </section>
 
       {/* ═══ FOOTER ═══ */}
