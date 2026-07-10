@@ -65,8 +65,8 @@ contract KredzAttestationVerifier {
         lastTimestamp[user] = timestamp;
 
         // Write to ERC-8004 Reputation Registry
-        // score is 0-1000; ERC-8004 expects 0-100, so we scale down
-        uint8 erc8004Score = uint8(score / 10);
+        // score is 0-1000; ERC-8004 expects 0-100, so we scale down with rounding
+        uint8 erc8004Score = uint8((score + 5) / 10);
         string memory tag = _tierTag(tier);
         string memory evidenceUri = string(abi.encodePacked(
             "https://kredz.xyz/attestation/", _toHex(user), "/", _uint64ToString(timestamp)

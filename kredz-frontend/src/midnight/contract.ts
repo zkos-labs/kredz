@@ -61,7 +61,10 @@ export async function deployContract(api: any): Promise<string> {
       submitTx: async (tx: any) => {
         const txHex = toHex(tx.serialize());
         const result = await api.submitTransaction(txHex);
-        return (result as any)?.transactionId ?? (result as any)?.id ?? String(txHex.slice(0, 64));
+        return (result as any)?.transactionId
+          ?? (result as any)?.id
+          ?? (result as any)?.txId
+          ?? String(txHex.slice(0, 64));
       },
     },
   };

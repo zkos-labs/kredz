@@ -9,10 +9,11 @@ const SOLANA_RPC = (import.meta.env.VITE_SOLANA_RPC as string | undefined) ?? 'h
 
 // ScoreBadge account layout (after 8-byte discriminator):
 // pubkey (32) | score u16 (2) | tier u8 (1) | timestamp i64 (8) = 43 bytes
+// Anchor/Borsh serializes all integers as little-endian
 function parseScoreBadge(data: Buffer) {
-  const score = data.readUInt16BE(40);   // 8 disc + 32 pubkey = offset 40
+  const score = data.readUInt16LE(40);
   const tier = data.readUInt8(42);
-  const timestamp = Number(data.readBigInt64BE(43));
+  const timestamp = Number(data.readBigInt64LE(43));
   return { score, tier, timestamp };
 }
 
@@ -48,7 +49,7 @@ export function useSolanaScore() {
     }
   }, []);
 
-  // mintBadge: builds Ed25519 pre-instruction + upsert_score instruction,
+  // mintBadge: builds Ed25519 pre-instruction + create_score instruction,
   // signs with Phantom, and sends to devnet.
   // Note: In production, relayer API provides Ed25519 signature. For dev, this is a demo function.
   const mintBadge = useCallback(async (
@@ -57,7 +58,6 @@ export function useSolanaScore() {
     tier: number,
     timestamp: number,
   ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const provider = (window as any)?.phantom?.solana ?? (window as any)?.solana;
     if (!provider) throw new Error('Phantom not found');
 
@@ -74,9 +74,8 @@ export function useSolanaScore() {
       msg.writeUInt8(tier, 34);
       msg.writeBigInt64BE(BigInt(timestamp), 35);
 
-      // Encode upsert_score instruction manually
-      // Run: `anchor build && anchor keys list` to get the actual discriminator
-      const disc = Buffer.from([0x70, 0x81, 0xbf, 0xd3, 0x16, 0x55, 0x24, 0x96]); // sha256("global:upsert_score")[..8]
+      // Encode create_score instruction manually
+      const disc = Buffer.from([0x8a, 0x7c, 0x53, 0x2a, 0x1e, 0x63, 0xf2, 0xd1]); // sha256("global:create_score")[..8]
       const args = Buffer.alloc(11);
       args.writeUInt16BE(score, 0);
       args.writeUInt8(tier, 2);
@@ -86,11 +85,16 @@ export function useSolanaScore() {
       const ed25519Ix = Ed25519Program.createInstructionWithPublicKey({
         publicKey: userPubkey.toBytes(),
         message: msg,
-        signature: Buffer.alloc(64), // placeholder
+        signature: Buffer.alloc(64),
       });
 
       const [badgePda] = PublicKey.findProgramAddressSync(
         [Buffer.from('kredz'), userPubkey.toBuffer()],
+        PROGRAM_ID
+      );
+
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('kredz-relayer-config')],
         PROGRAM_ID
       );
 
@@ -106,12 +110,14 @@ export function useSolanaScore() {
               { pubkey: badgePda, isSigner: false, isWritable: true },
               { pubkey: userPubkey, isSigner: false, isWritable: false },
               { pubkey: payerPubkey, isSigner: true, isWritable: true },
-              { pubkey: new PublicKey('11111111111111111111111'), isSigner: false, isWritable: false },
-              ],
-              data,
-            },
-          ],
-        }).compileToV0Message();
+              { pubkey: configPda, isSigner: false, isWritable: false },
+              { pubkey: new PublicKey('11111111111111111111111111111111'), isSigner: false, isWritable: false },
+              { pubkey: new PublicKey('Sysvar1nstructions1111111111111111111111111'), isSigner: false, isWritable: false },
+            ],
+            data,
+          },
+        ],
+      }).compileToV0Message();
 
       const tx = new VersionedTransaction(txMsg);
       const signed = await provider.signTransaction(tx);

@@ -63,7 +63,7 @@ function computeLayer2(tier: number, hasIncome: boolean, hasEmployment: boolean,
   if (hasEmployment) score += 80;
   if (hasBank) score += 80;
   if (hasEwallet) score += 60;
-  if (hasCredit) score -= 60;
+  if (hasCredit) score += 20;
   if (hasAdverse) score -= 80;
 
   return Math.max(0, Math.min(400, score));

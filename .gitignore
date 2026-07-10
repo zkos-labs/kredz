@@ -50,3 +50,4 @@ logs/
 # Nix build artifacts
 .direnv/
 result
+.vercel

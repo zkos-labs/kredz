@@ -2,50 +2,103 @@ use anchor_lang::prelude::*;
 
 declare_id!("x6MWmEFP2dDNepzXjyZngt5EvQqBDy6Vry6svcaXXMM");
 
-const RELAYER_PUBKEY_BYTES: [u8; 32] = [
-    0xc3, 0x4e, 0x6f, 0x7b, 0x2a, 0x8e, 0x84, 0x90,
-    0x59, 0x2c, 0x46, 0x01, 0xf4, 0x0a, 0x0f, 0x0a,
-    0xdb, 0x0e, 0xd4, 0x83, 0xc4, 0x24, 0x5f, 0xbb,
-    0x1d, 0xb9, 0x8d, 0x2d, 0x27, 0x3e, 0x5f, 0xc4,
-];
-
 #[program]
 pub mod kredz_score_badge {
     use super::*;
 
-    pub fn upsert_score(
-        ctx: Context<UpsertScore>,
+    fn verify_relayer_sig(
+        ix: &AccountInfo,
+        user_key: &[u8],
         score: u16,
         tier: u8,
         timestamp: i64,
+        relayer_pubkey_bytes: &[u8],
     ) -> Result<()> {
         let ed25519_id = anchor_lang::solana_program::ed25519_program::ID;
-        let ix = &ctx.accounts.ix_sysvar;
-        let ix_data = anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked(0, ix)?;
+        let ix_data =
+            anchor_lang::solana_program::sysvar::instructions::load_instruction_at_checked(0, ix)?;
         require_keys_eq!(ix_data.program_id, ed25519_id, KredzError::BadSigInstruction);
 
         let ix_bytes = ix_data.data.as_slice();
         require!(ix_bytes.len() >= 70, KredzError::BadSigInstruction);
-        require!(&ix_bytes[2..34] == &RELAYER_PUBKEY_BYTES, KredzError::WrongRelayer);
+        require!(&ix_bytes[2..34] == relayer_pubkey_bytes, KredzError::WrongRelayer);
 
         let msg_offset = u16::from_le_bytes([ix_bytes[66], ix_bytes[67]]) as usize;
         let msg_size = u16::from_le_bytes([ix_bytes[68], ix_bytes[69]]) as usize;
         require!(msg_size == 43, KredzError::BadMessage);
         let msg = &ix_bytes[msg_offset..msg_offset + msg_size];
 
-        let user_key = ctx.accounts.user.key().to_bytes();
-        require!(&msg[0..32] == user_key.as_ref(), KredzError::BadMessage);
+        require!(&msg[0..32] == user_key, KredzError::BadMessage);
         require!(u16::from_be_bytes([msg[32], msg[33]]) == score, KredzError::BadMessage);
         require!(msg[34] == tier, KredzError::BadMessage);
 
         let mut ts_bytes = [0u8; 8];
         ts_bytes.copy_from_slice(&msg[35..43]);
         require!(i64::from_be_bytes(ts_bytes) == timestamp, KredzError::BadMessage);
+        Ok(())
+    }
+
+    pub fn initialize_relayer_config(
+        ctx: Context<InitializeRelayerConfig>,
+        relayer_pubkey: [u8; 32],
+    ) -> Result<()> {
+        let config = &mut ctx.accounts.config;
+        config.admin = ctx.accounts.admin.key();
+        config.relayer_pubkey = relayer_pubkey;
+        Ok(())
+    }
+
+    pub fn update_relayer_pubkey(
+        ctx: Context<UpdateRelayerConfig>,
+        new_relayer_pubkey: [u8; 32],
+    ) -> Result<()> {
+        ctx.accounts.config.relayer_pubkey = new_relayer_pubkey;
+        Ok(())
+    }
+
+    pub fn create_score(
+        ctx: Context<CreateScore>,
+        score: u16,
+        tier: u8,
+        timestamp: i64,
+    ) -> Result<()> {
+        let user_key = ctx.accounts.user.key().to_bytes();
+        verify_relayer_sig(
+            &ctx.accounts.ix_sysvar,
+            &user_key,
+            score,
+            tier,
+            timestamp,
+            &ctx.accounts.config.relayer_pubkey,
+        )?;
+
+        let badge = &mut ctx.accounts.badge;
+        badge.user = ctx.accounts.user.key();
+        badge.score = score;
+        badge.tier = tier;
+        badge.timestamp = timestamp;
+        Ok(())
+    }
+
+    pub fn update_score(
+        ctx: Context<UpdateScore>,
+        score: u16,
+        tier: u8,
+        timestamp: i64,
+    ) -> Result<()> {
+        let user_key = ctx.accounts.user.key().to_bytes();
+        verify_relayer_sig(
+            &ctx.accounts.ix_sysvar,
+            &user_key,
+            score,
+            tier,
+            timestamp,
+            &ctx.accounts.config.relayer_pubkey,
+        )?;
 
         let badge = &mut ctx.accounts.badge;
         require!(timestamp > badge.timestamp, KredzError::StaleAttestation);
 
-        badge.user = ctx.accounts.user.key();
         badge.score = score;
         badge.tier = tier;
         badge.timestamp = timestamp;
@@ -54,7 +107,28 @@ pub mod kredz_score_badge {
 }
 
 #[derive(Accounts)]
-pub struct UpsertScore<'info> {
+pub struct InitializeRelayerConfig<'info> {
+    #[account(init, payer = admin, space = 8 + 32 + 32,
+              seeds = [b"kredz-relayer-config"], bump)]
+    pub config: Account<'info, RelayerConfig>,
+
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateRelayerConfig<'info> {
+    #[account(mut, seeds = [b"kredz-relayer-config"], bump,
+              constraint = config.admin == admin.key())]
+    pub config: Account<'info, RelayerConfig>,
+
+    pub admin: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct CreateScore<'info> {
     #[account(init, payer = payer, space = 8 + 32 + 2 + 1 + 8,
               seeds = [b"kredz", user.key().as_ref()], bump)]
     pub badge: Account<'info, ScoreBadge>,
@@ -65,11 +139,36 @@ pub struct UpsertScore<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
+    #[account(seeds = [b"kredz-relayer-config"], bump)]
+    pub config: Account<'info, RelayerConfig>,
+
     pub system_program: Program<'info, System>,
 
     /// CHECK: Instructions sysvar
     #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
     pub ix_sysvar: UncheckedAccount<'info>,
+}
+
+#[derive(Accounts)]
+pub struct UpdateScore<'info> {
+    #[account(mut, seeds = [b"kredz", user.key().as_ref()], bump)]
+    pub badge: Account<'info, ScoreBadge>,
+
+    /// CHECK: user whose score is being attested
+    pub user: UncheckedAccount<'info>,
+
+    #[account(seeds = [b"kredz-relayer-config"], bump)]
+    pub config: Account<'info, RelayerConfig>,
+
+    /// CHECK: Instructions sysvar
+    #[account(address = anchor_lang::solana_program::sysvar::instructions::ID)]
+    pub ix_sysvar: UncheckedAccount<'info>,
+}
+
+#[account]
+pub struct RelayerConfig {
+    pub admin: Pubkey,
+    pub relayer_pubkey: [u8; 32],
 }
 
 #[account]

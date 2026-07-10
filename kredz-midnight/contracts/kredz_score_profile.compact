@@ -3,6 +3,17 @@ pragma language_version >= 0.22;
 import CompactStandardLibrary;
 
 // ────── KREDZ Score Profile — Privacy-Preserving Credit Identity ──────────
+//
+// Trust Model:
+//   This contract uses a single attestor model. The `attestorSecret` witness
+//   proves the caller is the authorized attestation authority (scoring engine).
+//   Circuits `attest_score`, `link_evm`, and `link_solana` require attestor
+//   authorization. User consent is implied off-chain — the user provides their
+//   `user_pubkey` as input when calling these circuits, and the attestor only
+//   submits attestations for users who have gone through the scoring flow.
+//
+//   In a future version, user consent can be enforced on-chain via an additional
+//   witness proving knowledge of the private key corresponding to user_pubkey.
 
 struct ScoreData {
   score: Uint<16>,
@@ -36,6 +47,8 @@ pure circuit attestorPublicKey(secret: Bytes<32>, nonce: Uint<64>): Bytes<32> {
 }
 
 pure circuit makeScoreHash(data: ScoreData): Bytes<32> {
+  // persistentHash is type-aware — ScoreData struct provides implicit domain separation.
+  // The same raw bytes under a different struct type would produce a different hash.
   return persistentHash<ScoreData>(data);
 }
 

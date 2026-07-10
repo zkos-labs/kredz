@@ -26,7 +26,6 @@ template KredzScoreResponse
       do
         assert (not acknowledged)  -- cannot acknowledge twice
 
-        -- Mark this response as acknowledged
         create this with
           acknowledged = True
 
@@ -38,12 +37,14 @@ template KredzScoreResponse
           queryTime
           purpose
 
-    -- | kredz operator can view the acknowledgment status.
+    -- | kredz operator can view the acknowledgment status (read-only).
+    --   This choice exists to provide audit visibility; it requires the lender
+    --   to have acknowledged first and only recreates the contract unchanged.
     choice MarkAcknowledged : ContractId KredzScoreResponse
       controller operator
       do
-        create this with
-          acknowledged = True
+        assert (acknowledged)
+        create this
 
 -- | Immutable audit log of each score query.
 --   Signed by both the kredz operator and the lender.
