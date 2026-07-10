@@ -13,14 +13,26 @@ function fromHex(hex: string): Uint8Array {
 
 export function createPatchedPublicDataProvider(queryUrl: string, _subscriptionUrl: string) {
   async function queryLatest(query: string, address: string) {
-    const res = await fetch(queryUrl, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ query, variables: { address } }),
-    });
-    if (!res.ok) throw new Error(`Indexer HTTP error: ${res.status}`);
+    let res: Response;
+    try {
+      res = await fetch(queryUrl, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query, variables: { address } }),
+      });
+    } catch {
+      throw new Error('INDEXER_UNREACHABLE');
+    }
+    if (res.status === 404) throw new Error('CONTRACT_NOT_FOUND');
+    if (!res.ok) throw new Error(`INDEXER_HTTP_${res.status}`);
     const payload = await res.json();
-    if (payload.errors?.length) throw new Error(payload.errors.map((e: any) => e.message).join('; '));
+    if (payload.errors?.length) {
+      const msgs = payload.errors.map((e: any) => e.message).join('; ');
+      if (msgs.includes('not found') || msgs.includes('no contract')) {
+        throw new Error('CONTRACT_NOT_INDEXED');
+      }
+      throw new Error(`INDEXER_ERROR: ${msgs}`);
+    }
     return payload.data?.contractAction ?? null;
   }
 

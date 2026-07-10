@@ -14,9 +14,21 @@ export function createPrivateStateProvider() {
     async getSigningKey(addr: string) { return signingKeyStore.get(addr) ?? null; },
     async removeSigningKey(addr: string) { signingKeyStore.delete(addr); },
     async clearSigningKeys() { signingKeyStore.clear(); },
-    async exportPrivateStates(): Promise<never> { throw new Error('Not implemented'); },
-    async importPrivateStates(): Promise<never> { throw new Error('Not implemented'); },
-    async exportSigningKeys(): Promise<never> { throw new Error('Not implemented'); },
-    async importSigningKeys(): Promise<never> { throw new Error('Not implemented'); },
+    async exportPrivateStates(): Promise<Record<string, unknown>> {
+      const result: Record<string, unknown> = {};
+      stateStore.forEach((v, k) => { result[k] = v; });
+      return result;
+    },
+    async importPrivateStates(states: Record<string, unknown>): Promise<void> {
+      for (const [k, v] of Object.entries(states)) { stateStore.set(k, v); }
+    },
+    async exportSigningKeys(): Promise<Record<string, unknown>> {
+      const result: Record<string, unknown> = {};
+      signingKeyStore.forEach((v, k) => { result[k] = v; });
+      return result;
+    },
+    async importSigningKeys(keys: Record<string, unknown>): Promise<void> {
+      for (const [k, v] of Object.entries(keys)) { signingKeyStore.set(k, v); }
+    },
   };
 }

@@ -31,7 +31,7 @@ export function useEvmWallet() {
       const chainIdHex = await eth.request({ method: 'eth_chainId' }) as string;
       const chainId = parseInt(chainIdHex, 16);
 
-      // Prompt switch to Base Sepolia if not already on a Base chain
+      // Require Base Sepolia for correct contract interaction
       if (!BASE_CHAIN_IDS.includes(chainId)) {
         try {
           await eth.request({
@@ -39,9 +39,15 @@ export function useEvmWallet() {
             params: [{ chainId: '0x14a34' }], // Base Sepolia
           });
         } catch {
-          // User rejected switch. Continue anyway, just warn
-          console.warn('[KREDZ] Not on Base chain, continuing anyway');
+          throw new Error('WRONG_CHAIN');
         }
+      }
+
+      // Re-verify chain after switch
+      const finalChainIdHex = await eth.request({ method: 'eth_chainId' }) as string;
+      const finalChainId = parseInt(finalChainIdHex, 16);
+      if (!BASE_CHAIN_IDS.includes(finalChainId)) {
+        throw new Error('WRONG_CHAIN');
       }
 
       const wallet: EvmWallet = { address: accounts[0], chainId };

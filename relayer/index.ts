@@ -1,7 +1,13 @@
 // DEPRECATED: replaced by EffectStream sync service.
-// Remove after state-machine.ts output is validated against this output
-// for one full session. Deleting it before EffectStream is producing verified
-// matching output is a silent failure risk.
+//
+// Migration path:
+//   1. Complete EffectStream state-machine validation (effectstream/state-machine/src/scoring.ts)
+//   2. Run both relayer and EffectStream in parallel for one full session
+//   3. Compare outputs — if EffectStream matches this relayer's output, cut over
+//   4. Remove this file and update deployment configs
+//
+// Do NOT deploy this relayer to new environments. It is frozen for existing
+// deployments only. New deployments should use EffectStream exclusively.
 import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -80,9 +86,9 @@ async function main() {
   const wallet = new ethers.Wallet(RELAYER_PRIVATE_KEY, provider);
   const verifier = new ethers.Contract(VERIFIER_ADDRESS, VERIFIER_ABI, wallet);
 
-  console.log(`[relayer] Started. Watching Midnight contract: ${MIDNIGHT_CONTRACT_ADDRESS}`);
-  console.log(`[relayer] Relaying to Base verifier: ${VERIFIER_ADDRESS}`);
-  console.log(`[relayer] Relayer address: ${wallet.address}`);
+  console.log('[relayer] Started. Watching Midnight contract: ' + MIDNIGHT_CONTRACT_ADDRESS);
+  console.log('[relayer] Relaying to Base verifier: ' + VERIFIER_ADDRESS);
+  console.log('[relayer] Relayer address: ' + wallet.address);
 
   // Track last relayed timestamp per user to avoid duplicate relays
   const lastRelayed = new Map<string, number>();
@@ -105,7 +111,7 @@ async function main() {
     const prev = lastRelayed.get(evmAddress) ?? 0;
     if (timestamp <= prev) return; // already relayed
 
-    console.log(`[relayer] New attestation: user=${evmAddress} score=${score} tier=${tier} ts=${timestamp}`);
+    console.log('[relayer] New attestation: user=' + evmAddress + ' score=' + score + ' tier=' + tier + ' ts=' + timestamp);
 
     // Check on-chain last timestamp to avoid redundant txs
     try {
@@ -122,9 +128,9 @@ async function main() {
 
     try {
       const tx = await verifier.submitAttestation(evmAddress, score, tier, timestamp, sig);
-      console.log(`[relayer] Submitted tx: ${tx.hash}`);
+      console.log('[relayer] Submitted tx: ' + tx.hash);
       await tx.wait();
-      console.log(`[relayer] Confirmed. Score ${score} for ${evmAddress} is now on Base.`);
+      console.log('[relayer] Confirmed. Score ' + score + ' for ' + evmAddress + ' is now on Base.');
       lastRelayed.set(evmAddress, timestamp);
     } catch (err) {
       console.error('[relayer] submitAttestation failed:', err);

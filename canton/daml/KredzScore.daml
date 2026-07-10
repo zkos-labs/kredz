@@ -17,7 +17,10 @@ template KredzScore
     expiresAt : Time        -- score valid for 30 days from update
   where
     signatory operator
-    observer operator
+
+    key (operator, borrowerDid) : (Party, Text)
+
+    ensure score >= 0 && score <= 1000
 
     -- | Institution queries this borrower's score.
     --   Accessible to any Party (lender). Creates a KredzScoreResponse visible only to the lender.

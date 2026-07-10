@@ -72,7 +72,7 @@ export default function LinkWallets() {
   ];
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-16 flex items-center justify-center relative bg-black">
+    <div className="min-h-screen pt-24 px-4 pb-16 flex items-center justify-center relative bg-base-200 text-base-content">
       <div className="w-full max-w-lg relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <p className="font-medium text-[10px] sm:text-xs text-[#DEDBC8] uppercase tracking-[0.2em] mb-3">Five-Network Identity</p>
