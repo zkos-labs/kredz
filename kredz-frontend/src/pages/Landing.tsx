@@ -22,7 +22,7 @@ const HERO_LINES = [
   { text: 'Every balance.', pause: 500 },
   { text: 'Every wallet you ever touched.', pause: 1000 },
   { text: 'You hesitate.', pause: 800 },
-  { text: 'You are not hiding anything.', pause: 600, backspaces: [{ word: 'hiding', replacement: 'just not interested in being naked' }], pause: 1500 },
+  { text: 'You are not hiding anything.', backspaces: [{ word: 'hiding', replacement: 'just not interested in being naked' }], pause: 1500 },
   { text: 'What if you could prove your credit...', pause: 600 },
   { text: 'without revealing your credit.', pause: 1000 },
   { text: 'What if the math spoke for you.', pause: 700 },
