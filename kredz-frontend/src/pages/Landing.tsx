@@ -83,7 +83,7 @@ const LAYERS = [
 
 const NETWORKS = [
   { name: 'Midnight', role: 'Credit Identity', desc: 'ZK proofs protect your data. Selective disclosure.', dot: 'bg-purple-400' },
-  { name: 'Zenith (Canton)', role: 'Institutional Lenders', desc: 'Solidity on Zenith EVM. Sub-transaction privacy. Regulated lenders query scores confidentially.', dot: 'bg-indigo-400' },
+  { name: 'Canton', role: 'Institutional Lenders', desc: 'DAML smart contracts. Sub-transaction privacy. Regulated lenders query scores confidentially via the Canton ledger API.', dot: 'bg-indigo-400' },
   { name: 'Base', role: 'EVM DeFi', desc: 'ERC-8004 SBT badge. Any lending protocol reads your score on-chain.', dot: 'bg-blue-400' },
   { name: 'Solana', role: 'SVM DeFi', desc: 'ScoreBadge PDA with Ed25519 verification.', dot: 'bg-emerald-400' },
   { name: 'Cardano', role: 'Native Chain', desc: 'Midnight partner chain. Blockfrost indexer for wallet history analysis.', dot: 'bg-blue-500' },

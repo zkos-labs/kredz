@@ -20,8 +20,8 @@ const TIERS = [
   },
   { id: 2 as const, name: 'Full Compliance', subtitle: 'Full ZK-KYC bundle', range: '0-1000',
     proof: 'fullKyc', proofLabel: 'Full KYC bundle (name, income, ID - all ZK-proven)',
-    description: 'Full compliance via ZK-circuits. Unlock institutional liquidity pools via Zenith EVM on Canton and the maximum score range.',
-    features: ['All Pseudonymous features', 'Full ZK-KYC bundle', 'Zenith (Canton) lenders', 'Maximum score range'],
+    description: 'Full compliance via ZK-circuits. Unlock institutional liquidity pools via DAML contracts on Canton and the maximum score range.',
+    features: ['All Pseudonymous features', 'Full ZK-KYC bundle', 'Canton institutional lenders', 'Maximum score range'],
   },
 ];
 
@@ -60,8 +60,9 @@ export default function TierSelection() {
       toast(`Tier ${tierId} activated! Your KREDZ Score: ${total}`, 'success');
       navigate('/app/dashboard');
     } catch (err) {
-      console.error(err);
-      toast('Transaction failed. Please try again.', 'error');
+      console.error('[TierSelection] Transaction failed:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      toast(`Transaction failed: ${msg}`, 'error');
     } finally { setLoading(false); }
   }
 

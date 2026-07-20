@@ -24,7 +24,7 @@ export default function LinkWallets() {
     try { await connect(); toast('Midnight wallet connected', 'success'); }
     catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      toast(msg === 'ONEM_NOT_FOUND' ? 'Please install the 1AM wallet for Midnight Network' : 'Connection failed', 'error');
+      toast(msg === 'ONEM_NOT_FOUND' ? 'Please install the 1AM wallet for Midnight Network' : (msg || 'Connection failed'), 'error');
     }
   }
 
@@ -32,7 +32,8 @@ export default function LinkWallets() {
     try { await connectEvm(); toast('Base wallet connected', 'success'); }
     catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      toast(msg === 'METAMASK_NOT_FOUND' ? 'Please install MetaMask to connect a Base wallet' : 'Connection failed', 'error');
+      console.error('[Base/MetaMask] connect failed', err);
+      toast(msg === 'METAMASK_NOT_FOUND' ? 'Please install MetaMask to connect a Base wallet' : `Base connect failed: ${msg || 'unknown'}`, 'error');
     }
   }
 
@@ -40,7 +41,8 @@ export default function LinkWallets() {
     try { await connectSolana(); toast('Solana wallet connected', 'success'); }
     catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      toast(msg === 'PHANTOM_NOT_FOUND' ? 'Please install Phantom to connect a Solana wallet' : 'Connection failed', 'error');
+      console.error('[Solana/Phantom] connect failed', err);
+      toast(msg === 'PHANTOM_NOT_FOUND' ? 'Please install Phantom to connect a Solana wallet' : `Solana connect failed: ${msg || 'unknown'}`, 'error');
     }
   }
 
@@ -120,7 +122,7 @@ export default function LinkWallets() {
           className="bg-[#0A0A0A] rounded-xl p-4 flex items-start gap-3 mb-6 border border-[#DEDBC8]/5">
           <AlertCircle size={15} className="text-[#DEDBC8]/50 shrink-0 mt-0.5" />
           <p className="text-xs text-[#DEDBC8]/50 leading-relaxed">
-            Linking stores your Base and Solana addresses on Midnight via ZK circuits. Your KREDZ Score will be bridged to all five networks automatically. Canton access unlocks at Tier 2 via Zenith EVM.
+            Linking stores your Base and Solana addresses on Midnight via ZK circuits. Your KREDZ Score will be bridged to all five networks automatically. Canton institutional access unlocks at Tier 2 via DAML smart contracts.
           </p>
         </motion.div>
 

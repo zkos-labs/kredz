@@ -50,3 +50,25 @@
 **Status:** Compiled (5 circuits, all ZK keys generated), frontend build passing
 
 ---
+
+### Phase 4: Canton — DAML ✅
+
+| Detail | Value |
+|--------|-------|
+| Language | DAML 3.3.0 |
+| Templates | 4 (KredzScore, KredzScoreResponse, KredzAuditLog, KredzLenderSubscription) |
+| Tests | 5 Daml Script tests (lifecycle, update, expiry, subscription, privacy) |
+| LocalNet | Docker Compose (2 participants + synchronizer + 4 postgres) |
+| Config | participant configs + bootstrap.canton + deploy-dar.sh |
+| Frontend | useCanton hook (JSON Ledger API client) |
+
+**Usage:** Institutional lenders query borrower scores confidentially. Sub-transaction privacy prevents third-party visibility. Immutable audit logs track every query.
+
+**LocalNet:** `cd canton && docker compose up -d && ./deploy-dar.sh build && ./deploy-dar.sh localnet`
+**Status:** DAML contracts written, config files complete, ready for localnet deploy
+
+**Testnet Deployment:** Requires SV sponsorship via Canton Network forum.
+1. Build DAR: `./deploy-dar.sh build`
+2. Configure participant for Testnet GS
+3. Upload DAR + allocate parties
+4. Frontend connects via `VITE_CANTON_LEDGER_API`

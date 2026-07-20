@@ -1,0 +1,36 @@
+# Canton Bootstrap Script — LocalNet
+# This file bootstraps the Canton nodes on first start.
+# It connects participant1 to the sequencer/mediator and deploys the DAML contracts.
+
+// ── Connect participants to the synchronizer ──
+participant1.domains.connect_local(sequencer1, "mydomain")
+participant2.domains.connect_local(sequencer1, "mydomain")
+
+// ── Wait for both participants to be registered ──
+utils.retry_until_true {
+  participant1.domains.active("mydomain")
+}
+utils.retry_until_true {
+  participant2.domains.active("mydomain")
+}
+
+// ── Upload the kredz DAR to both participants ──
+participant1.dars.upload("kredz.dar", false)
+participant2.dars.upload("kredz.dar", false)
+
+// ── Allocate parties ──
+val kredzParty = participant1.parties.enable("kredz")
+val lenderParty = participant2.parties.enable("lender")
+
+// ── Print connection info ──
+println("")
+println("═══════════════════════════════════════════")
+println("  Canton LocalNet Ready — kredz.xyz")
+println("═══════════════════════════════════════════")
+println(s"  Participant 1 (kredz):        http://localhost:3901 (Ledger API)")
+println(s"  Participant 2 (lender):       http://localhost:4901 (Ledger API)")
+println(s"  JSON API (participant1):      http://localhost:3975")
+println(s"  JSON API (participant2):      http://localhost:4975")
+println(s"  kredz party ID:               ${kredzParty}")
+println(s"  lender party ID:              ${lenderParty}")
+println("═══════════════════════════════════════════")

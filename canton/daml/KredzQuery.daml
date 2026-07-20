@@ -1,7 +1,5 @@
 module KredzQuery where
 
-import DA.Time
-
 -- | Response to a lender's ScoreQuery.
 --   Visible to the lender and the kredz operator only.
 --   Sub-transaction privacy ensures no other participants see this.

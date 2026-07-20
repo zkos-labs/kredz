@@ -187,7 +187,7 @@ export default function Dashboard() {
           <span className="text-[10px] text-[#DEDBC8]/20">One score, five networks, zero repetition</span>
         </motion.div>
 
-        {/* Zenith (Canton) Card */}
+        {/* Canton Card */}
         {walletsLinked && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.34 }}
             className="bg-[#101010] rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -197,23 +197,23 @@ export default function Dashboard() {
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-[#E1E0CC]">Zenith (Canton)</span>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300">Institutional</span>
+                  <span className="font-medium text-[#E1E0CC]">Canton Network</span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300">DAML</span>
                   {tierIdx >= 2 && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300">Active</span>}
                 </div>
                 <p className="text-sm text-[#DEDBC8]/40">
                   {tierIdx >= 2
-                    ? 'Your score is available to institutional lenders on Zenith EVM via sub-transaction privacy. Lenders query your score confidentially.'
+                    ? 'Your score is available to institutional lenders on Canton via DAML smart contracts. Sub-transaction privacy. Lenders query your score confidentially.'
                     : tierIdx >= 1
-                    ? 'Upgrade to Tier 2 (Full Compliance) to unlock institutional lender access on Zenith EVM (Canton).'
-                    : 'Institutional access unlocks at Tier 2. Build your score and complete KYC to reach lenders on Zenith EVM.'}
+                    ? 'Upgrade to Tier 2 (Full Compliance) to unlock institutional lender access on Canton Network.'
+                    : 'Institutional access unlocks at Tier 2. Build your score and complete KYC to reach lenders on Canton.'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <a href="https://docs.zenith.network/zenith-evm" target="_blank" rel="noopener noreferrer"
+              <a href="https://docs.canton.network" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#1A1A1A] text-xs text-[#DEDBC8]/50 hover:text-[#DEDBC8] transition-colors border border-[#DEDBC8]/5">
-                Zenith EVM Docs <ExternalLink size={12} />
+                Canton Docs <ExternalLink size={12} />
               </a>
             </div>
           </motion.div>

@@ -10,6 +10,7 @@ import KredzSubscription
 --   Creates a score → lender queries it → acknowledges → audit log created
 testScoreLifecycle : Script ()
 testScoreLifecycle = script do
+  -- allocate parties
   kredz <- allocatePartyWithHint "kredz" (PartyIdHint "kredz")
   lender <- allocatePartyWithHint "lender" (PartyIdHint "lender")
   thirdParty <- allocatePartyWithHint "thirdParty" (PartyIdHint "thirdParty")
@@ -24,7 +25,7 @@ testScoreLifecycle = script do
       tier = "pseudonymous"
       proofHash = "0xabc123def456789"
       updatedAt = t
-      expiresAt = addRelTime t (DA.Time.days 30)
+      expiresAt = addRelTime t (days 30)
 
   -- Lender queries the score
   responseCid <- submit lender do
@@ -42,7 +43,7 @@ testScoreLifecycle = script do
 --   Operator updates the score → new contract is created
 testScoreUpdate : Script ()
 testScoreUpdate = script do
-  kredz <- allocatePartyWithHint "kredz" (PartyIdHint "kredz")
+  kredz <- allocatePartyByHint (PartyIdHint "kredz")
 
   t <- getTime
   scoreCid <- submit kredz do
@@ -53,7 +54,7 @@ testScoreUpdate = script do
       tier = "anonymous"
       proofHash = "0xoldhash"
       updatedAt = t
-      expiresAt = addRelTime t (DA.Time.days 30)
+      expiresAt = addRelTime t (days 30)
 
   -- Operator updates the score
   newScoreCid <- submit kredz do
@@ -67,8 +68,8 @@ testScoreUpdate = script do
 --   Expired score → lender query should fail
 testScoreExpiry : Script ()
 testScoreExpiry = script do
-  kredz <- allocatePartyWithHint "kredz" (PartyIdHint "kredz")
-  lender <- allocatePartyWithHint "lender" (PartyIdHint "lender")
+  kredz <- allocatePartyByHint (PartyIdHint "kredz")
+  lender <- allocatePartyByHint (PartyIdHint "lender")
 
   t <- getTime
   scoreCid <- submit kredz do
@@ -93,8 +94,8 @@ testScoreExpiry = script do
 --   Lender creates subscription → adds borrower → removes borrower → cancels
 testSubscriptionLifecycle : Script ()
 testSubscriptionLifecycle = script do
-  kredz <- allocatePartyWithHint "kredz" (PartyIdHint "kredz")
-  lender <- allocatePartyWithHint "lender" (PartyIdHint "lender")
+  kredz <- allocatePartyByHint (PartyIdHint "kredz")
+  lender <- allocatePartyByHint (PartyIdHint "lender")
 
   -- Create subscription with two borrower DIDs
   subCid <- submit lender do
@@ -125,9 +126,9 @@ testSubscriptionLifecycle = script do
 --   Third party cannot see the response contract between kredz and lender
 testSubTransactionPrivacy : Script ()
 testSubTransactionPrivacy = script do
-  kredz <- allocatePartyWithHint "kredz" (PartyIdHint "kredz")
-  lender <- allocatePartyWithHint "lender" (PartyIdHint "lender")
-  thirdParty <- allocatePartyWithHint "thirdParty" (PartyIdHint "thirdParty")
+  kredz <- allocatePartyByHint (PartyIdHint "kredz")
+  lender <- allocatePartyByHint (PartyIdHint "lender")
+  thirdParty <- allocatePartyByHint (PartyIdHint "thirdParty")
 
   t <- getTime
   scoreCid <- submit kredz do
@@ -138,7 +139,7 @@ testSubTransactionPrivacy = script do
       tier = "compliant"
       proofHash = "0xprivatehash"
       updatedAt = t
-      expiresAt = addRelTime t (DA.Time.days 30)
+      expiresAt = addRelTime t (days 30)
 
   -- Lender queries the score
   responseCid <- submit lender do

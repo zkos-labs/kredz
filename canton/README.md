@@ -1,20 +1,13 @@
 # kredz.xyz — Canton Network DAML Contracts
 
-## Status: Spec implementation — pending `cn-quickstart` environment
+## Status: Ready for localnet & DevNet deploy
 
-These DAML smart contracts implement the Canton Network layer of kredz.xyz as specified in the v0.2 PRD (Section 9).
+These DAML smart contracts implement the Canton Network layer of kredz.xyz, providing
+institutional lenders with confidential, ZK-attested credit scores via sub-transaction privacy.
 
-## Files
+> **Deploying to Canton DevNet?** See [DEVNET.md](./DEVNET.md) for the full step-by-step guide.
 
-| File | Purpose |
-|------|---------|
-| `daml.yaml` | Project config (SDK 3.3.0, package name: `kredz`) |
-| `daml/KredzScore.daml` | `KredzScore` template — borrower score registry with `QueryScore`, `UpdateScore`, `ExpireScore` choices |
-| `daml/KredzQuery.daml` | `KredzScoreResponse` and `KredzAuditLog` templates — query response + immutable audit trail |
-| `daml/KredzSubscription.daml` | `KredzLenderSubscription` template — lender subscription with `AddBorrower`, `RemoveBorrower`, `Cancel` choices |
-| `daml/Main.daml` | Module re-exports (package entry point) |
-
-## Template Architecture
+## Architecture
 
 ```
 KredzScore (score registry)
@@ -24,122 +17,110 @@ KredzScore (score registry)
     └── ExpireScore → ()
 
 KredzLenderSubscription (lender sub)
-    ├── AddBorrower
-    ├── RemoveBorrower
-    ├── UpdateThreshold
-    ├── UpdateWebhook
+    ├── AddBorrower / RemoveBorrower
+    ├── UpdateThreshold / UpdateWebhook
     └── Cancel
 ```
 
-## Signatories & Visibility
-
-- **kredz operator** is signatory on all contracts
-- **Lender** is signatory on subscription and co-signatory on audit logs
-- `KredzScoreResponse` is visible only to operator + querying lender (sub-transaction privacy)
-- `KredzAuditLog` is co-signed by operator + lender, immutable
-
-## How to Compile & Test
-
-These contracts require the Canton Network developer toolchain which uses Nix + Docker + Gradle. The recommended approach is via `cn-quickstart`.
-
-### Prerequisites
+## Quick Start — LocalNet
 
 ```bash
-# 1. Clone the quickstart
-git clone https://github.com/digital-asset/cn-quickstart.git
-cd cn-quickstart
-direnv allow
+# 1. Start the Canton localnet (Docker)
+cd canton
+docker compose up -d
 
-# 2. Install Daml SDK
-cd quickstart
-make install-daml-sdk
+# 2. Wait for all services to be healthy
+docker compose ps
 
-# 3. Copy kredz DAML files into the quickstart daml/ directory
-cp -r path/to/kredz/canton/daml/* daml/
+# 3. Build the DAML contracts into a DAR
+./deploy-dar.sh build
 
-# 4. Build DAML contracts
-make build-daml
-
-# 5. Run localnet
-make setup
-make build
-make start
+# 4. Deploy the DAR to the localnet
+./deploy-dar.sh localnet
 ```
 
-### Daml Script Tests
+Once running, the JSON Ledger API is available at:
+- **Participant 1 (kredz operator):** `http://localhost:3975`
+- **Participant 2 (lender):** `http://localhost:4975`
 
-Add test scripts in `daml/` using Daml Script:
+## Deploy to Canton Testnet
 
-```daml
-module KredzTest where
+### Prerequisites
+1. SV (Super Validator) sponsorship — request via the [Canton Network forum](https://discuss.canton.network)
+2. A Canton participant node connected to the Canton Testnet Global Synchronizer
+3. Canton Coin for traffic credits
 
-import Daml.Script
-import KredzScore
-import KredzQuery
-import KredzSubscription
+### Steps
+```bash
+# 1. Build the DAR
+./deploy-dar.sh build
 
-testScoreLifecycle : Script ()
-testScoreLifecycle = script do
-  -- allocate parties
-  kredz <- allocatePartyWithHint "kredz" (PartyIdHint "kredz")
-  lender <- allocatePartyWithHint "lender" (PartyIdHint "lender")
+# 2. Configure your participant for Testnet (update participant.conf):
+#    - Point to the Testnet Global Synchronizer endpoints
+#    - Set up mutual TLS certificates
 
-  -- create initial score
-  t <- getTime
-  scoreCid <- submit kredz do
-    createCmd KredzScore with
-      operator = kredz
-      borrowerDid = "did:midnight:abc123"
-      score = 650
-      tier = "pseudonymous"
-      proofHash = "0xabc123..."
-      updatedAt = t
-      expiresAt = addRelTime t (days 30)
+# 3. Start your participant and upload the DAR
+#    participant.dars.upload("kredz.dar", false)
 
-  -- lender queries score
-  responseCid <- submit lender do
-    exerciseCmd scoreCid QueryScore with
-      lender
-      purpose = "credit_assessment"
+# 4. Allocate parties
+#    participant.parties.enable("kredz")
 
-  -- lender acknowledges (creates audit log)
-  submit lender do
-    exerciseCmd responseCid AcknowledgeScore
-
-  pure ()
+# 5. Your JSON Ledger API is now accessible to institutional lenders
 ```
 
-### Deploy to DevNet
+## Frontend Integration
 
-After local testing:
-1. Request DevNet access via a sponsoring SV node (see docs.canton.network)
-2. Deploy via `make deploy-to-devnet`
-3. Onboard institutional lenders via Canton's participant onboarding process
+The frontend uses the `useCanton` hook at `src/hooks/useCanton.ts` to connect to the Canton JSON Ledger API:
 
-### Deploy to MainNet
+```tsx
+import { useCanton } from '../hooks/useCanton';
 
-Requires:
-- Validator node connected to MainNet via sponsored SV
-- DAR file uploaded and vetted by SV
-- Canton Coin for traffic credits
+const { queryScore, checkHealth, loading, error } = useCanton();
 
-## Differences from PRD Pseudocode
+// Check if Canton is reachable
+const online = await checkHealth();
 
-The v0.2 PRD uses conceptual pseudocode. This implementation corrects several syntax details for actual Cameron DAML v3.x:
+// Query a borrower's score by Midnight DID
+const score = await queryScore('did:midnight:abc123');
+```
 
-| PRD Pseudocode | DAML v3.x |
-|---------------|-----------|
-| `kredz : Party` (standalone) | Part of `with` block: `kredz : Party` |
-| `assertMsg "msg" condition` | `assert condition` (with comment for context) |
-| `now ()` | `getTime` |
-| `filter (/= did)` | `filter (/= did) dids` |
-| `addRelTime (now ()) (days 30)` | `addRelTime t (DA.Time.days 30)` |
-| `Optional Text` | Correct — DAML supports `Optional` |
-| `signatory kredz` | Correct — comma-separated or separate lines |
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_CANTON_LEDGER_API` | `http://localhost:3975` | Canton JSON Ledger API URL |
+| `VITE_CANTON_KREDZ_PARTY` | `kredz` | Canton party ID for the kredz operator |
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `daml/KredzScore.daml` | `KredzScore` template — borrower score registry |
+| `daml/KredzQuery.daml` | `KredzScoreResponse` + `KredzAuditLog` templates |
+| `daml/KredzSubscription.daml` | `KredzLenderSubscription` template |
+| `daml/KredzTests.daml` | 5 Daml Script tests (score lifecycle, update, expiry, subscription, privacy) |
+| `daml/Main.daml` | Package entry point |
+| `daml.yaml` | Project config (SDK 3.3.0) |
+| `deploy-dar.sh` | Build and deploy DAR to localnet or testnet |
+| `bootstrap.canton` | Auto-bootstrap script for localnet |
+| `docker-compose.yaml` | 7-service localnet (2 participants + sequencer + mediator + 4 postgres) |
+| `config/participant1.conf` | Kredz operator participant config |
+| `config/participant2.conf` | Institutional lender participant config |
+| `config/sequencer.conf` | Global synchronizer sequencer config |
+| `config/mediator.conf` | Global synchronizer mediator config |
+
+## Signatories & Privacy Model
+
+| Contract | Signatories | Observers | Privacy |
+|----------|------------|-----------|---------|
+| KredzScore | kredz operator | kredz operator | Public to operator |
+| KredzScoreResponse | kredz operator | lender | Sub-transaction privacy |
+| KredzAuditLog | kredz operator + lender | — | Immutable, co-signed |
+| KredzLenderSubscription | kredz operator + lender | — | Operator + lender only |
 
 ## References
 
 - [Canton Network Docs](https://docs.canton.network)
 - [Canton QuickStart](https://github.com/digital-asset/cn-quickstart)
 - [DAML Language Reference](https://docs.canton.network/appdev/reference/daml-language-reference)
-- [Canton DevNet Onboarding](https://docs.canton.network/global-synchronizer/deployment/onboarding-process)
+- [Canton DevNet/TestNet Onboarding](https://docs.canton.network/global-synchronizer/deployment/onboarding-process)

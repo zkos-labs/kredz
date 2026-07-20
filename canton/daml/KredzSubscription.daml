@@ -1,8 +1,5 @@
 module KredzSubscription where
 
-import DA.List
-import DA.Optional
-
 -- | Lender subscription to score change notifications for a list of borrowers.
 --   When a subscribed borrower's score changes by >= threshold, a Canton event is emitted.
 template KredzLenderSubscription

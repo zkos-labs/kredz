@@ -16,7 +16,7 @@
 services:
   # ── PostgreSQL databases ──
   postgres-participant1:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     environment:
       POSTGRES_USER: canton
       POSTGRES_PASSWORD: canton
@@ -32,7 +32,7 @@ services:
       retries: 5
 
   postgres-participant2:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     environment:
       POSTGRES_USER: canton
       POSTGRES_PASSWORD: canton
@@ -48,7 +48,7 @@ services:
       retries: 5
 
   postgres-sequencer:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     environment:
       POSTGRES_USER: canton
       POSTGRES_PASSWORD: canton
@@ -64,7 +64,7 @@ services:
       retries: 5
 
   postgres-mediator:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     environment:
       POSTGRES_USER: canton
       POSTGRES_PASSWORD: canton
@@ -81,7 +81,7 @@ services:
 
   # ── Canton Participant 1 (kredz.xyz operator) ──
   participant1:
-    image: digitalasset/canton-open-source:latest
+    image: docker.io/digitalasset/canton-open-source:latest
     depends_on:
       postgres-participant1:
         condition: service_healthy
@@ -107,7 +107,7 @@ services:
 
   # ── Canton Participant 2 (institutional lender) ──
   participant2:
-    image: digitalasset/canton-open-source:latest
+    image: docker.io/digitalasset/canton-open-source:latest
     depends_on:
       postgres-participant2:
         condition: service_healthy
@@ -133,7 +133,7 @@ services:
 
   # ── Global Synchronizer — Sequencer ──
   sequencer:
-    image: digitalasset/canton-open-source:latest
+    image: docker.io/digitalasset/canton-open-source:latest
     depends_on:
       postgres-sequencer:
         condition: service_healthy
@@ -148,7 +148,7 @@ services:
 
   # ── Global Synchronizer — Mediator ──
   mediator:
-    image: digitalasset/canton-open-source:latest
+    image: docker.io/digitalasset/canton-open-source:latest
     depends_on:
       postgres-mediator:
         condition: service_healthy
@@ -163,15 +163,16 @@ services:
       POSTGRES_HOST: postgres-mediator
     restart: unless-stopped
 
-  # ── Daml Shell (for testing and manual ledger interaction) ──
+  # ── Daml Shell (for building DARs, testing, and manual ledger interaction) ──
   daml-shell:
-    image: digitalasset/daml-sdk:latest
+    image: docker.io/digitalasset/daml-sdk:latest
     depends_on:
       participant1:
         condition: service_started
     volumes:
       - ./daml:/workspace/daml:ro
       - ./daml.yaml:/workspace/daml.yaml:ro
+      - ./KredzTests.daml:/workspace/daml/KredzTests.daml:ro 2>/dev/null || true
     working_dir: /workspace
     stdin_open: true
     tty: true
